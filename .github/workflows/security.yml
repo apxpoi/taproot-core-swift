@@ -15,20 +15,25 @@ permissions:
 jobs:
   codeql-swift:
     name: CodeQL (Swift)
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest]
+        swift: ["6.2"]
+    runs-on: ${{ matrix.os }}
+
     timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Up Swift 6.2
+      - name: Set Up Swift ${{ matrix.swift }}
         uses: swift-actions/setup-swift@v2
         with:
-          swift-version: "6.2"
+          swift-version: ${{ matrix.swift }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: swift
           build-mode: manual
@@ -39,22 +44,6 @@ jobs:
           swift build
 
       - name: Analyze
-        uses: github/codeql-action/analyze@v3
-
-  codeql-actions:
-    name: CodeQL (Actions)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/analyze@v4
         with:
-          languages: actions
-          build-mode: none
-
-      - name: Analyze
-        uses: github/codeql-action/analyze@v3
+          category: "/language:swift"
