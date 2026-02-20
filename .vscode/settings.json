@@ -1,0 +1,12 @@
+{
+  "swiftformat.enable": true,
+  "swiftformat.path": [
+    "/opt/homebrew/bin/swiftformat"
+  ],
+  "cSpell.words": [
+    "Ciphertext",
+    "HMAC",
+    "PBKDF",
+    "PBKDF2"
+  ]
+}
