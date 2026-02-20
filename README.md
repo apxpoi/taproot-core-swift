@@ -20,6 +20,8 @@ It is designed to be:
 - Portable
 - Long-term stable
 
+[![CI](https://github.com/apxpoi/taproot-core-swift/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/ci.yml) [![Security Scan](https://github.com/apxpoi/taproot-core-swift/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/security.yml) [![Dependabot Updates](https://github.com/apxpoi/taproot-core-swift/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/dependabot/dependabot-updates)
+
 Build requirement:
 
 - Swift 6.x
