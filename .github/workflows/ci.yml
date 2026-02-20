@@ -23,8 +23,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Up Swift (latest stable)
+      - name: Set Up Swift ${{ matrix.swift }}
         uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ matrix.swift }}
 
       - name: Swift Version
         run: swift --version
