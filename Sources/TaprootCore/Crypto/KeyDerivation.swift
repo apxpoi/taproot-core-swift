@@ -1,5 +1,4 @@
-import CommonCrypto
-import CryptoKit
+import Crypto
 import Foundation
 
 public enum KeyDerivationError: Error {
@@ -35,36 +34,43 @@ public enum KeyDerivation {
         iterations: Int,
         keyLength: Int
     ) throws -> Data {
-        var derivedKey = Data(count: keyLength)
+        let hashLength = 32
+        let blockCount = (keyLength + hashLength - 1) / hashLength
+        var derivedKey = Data()
+        derivedKey.reserveCapacity(blockCount * hashLength)
 
-        let status = derivedKey.withUnsafeMutableBytes { derivedKeyBytes in
-            let derivedKeyBytesPointer = derivedKeyBytes.bindMemory(to: UInt8.self).baseAddress!
+        for blockIndex in 1...blockCount {
+            var blockIndexBE = UInt32(blockIndex).bigEndian
+            var blockInput = Data(salt)
+            withUnsafeBytes(of: &blockIndexBE) { blockInput.append(contentsOf: $0) }
 
-            return password.withUnsafeBytes { passwordBytes in
-                let passwordPointer = passwordBytes.bindMemory(to: Int8.self).baseAddress!
+            var u = hmacSHA256(key: password, data: blockInput)
+            var t = u
 
-                return salt.withUnsafeBytes { saltBytes in
-                    let saltPointer = saltBytes.bindMemory(to: UInt8.self).baseAddress!
-
-                    return CCKeyDerivationPBKDF(
-                        CCPBKDFAlgorithm(kCCPBKDF2),
-                        passwordPointer,
-                        password.count,
-                        saltPointer,
-                        salt.count,
-                        CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                        UInt32(iterations),
-                        derivedKeyBytesPointer,
-                        keyLength
-                    )
+            if iterations > 1 {
+                for _ in 2...iterations {
+                    u = hmacSHA256(key: password, data: Data(u))
+                    xorInPlace(&t, with: u)
                 }
             }
+
+            derivedKey.append(contentsOf: t)
         }
 
-        guard status == kCCSuccess else {
-            throw KeyDerivationError.keyDerivationFailed(status: status)
-        }
+        return Data(derivedKey.prefix(keyLength))
+    }
 
-        return derivedKey
+    private static func hmacSHA256(key: Data, data: Data) -> [UInt8] {
+        let authenticationCode = HMAC<SHA256>.authenticationCode(
+            for: data,
+            using: SymmetricKey(data: key)
+        )
+        return Array(authenticationCode)
+    }
+
+    private static func xorInPlace(_ lhs: inout [UInt8], with rhs: [UInt8]) {
+        for index in lhs.indices {
+            lhs[index] ^= rhs[index]
+        }
     }
 }

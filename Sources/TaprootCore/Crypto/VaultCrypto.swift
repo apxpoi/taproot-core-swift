@@ -1,5 +1,8 @@
-import CryptoKit
+import Crypto
 import Foundation
+#if canImport(Security)
+import Security
+#endif
 
 public enum VaultCryptoError: Error {
     case encryptionFailed
@@ -50,20 +53,32 @@ public enum VaultCrypto {
     }
 
     private static func randomData(length: Int) throws -> Data {
-        var data = Data(count: length)
+        #if canImport(Security)
+            var data = Data(count: length)
 
-        let status = try data.withUnsafeMutableBytes { buffer -> Int32 in
-            guard let baseAddress = buffer.baseAddress else {
-                throw VaultCryptoError.randomBufferUnavailable
+            let status = try data.withUnsafeMutableBytes { buffer -> Int32 in
+                guard let baseAddress = buffer.baseAddress else {
+                    throw VaultCryptoError.randomBufferUnavailable
+                }
+
+                return SecRandomCopyBytes(kSecRandomDefault, length, baseAddress)
             }
 
-            return SecRandomCopyBytes(kSecRandomDefault, length, baseAddress)
-        }
+            guard status == 0 else {
+                throw VaultCryptoError.randomGenerationFailed(status: status)
+            }
 
-        guard status == 0 else {
-            throw VaultCryptoError.randomGenerationFailed(status: status)
-        }
+            return data
+        #else
+            var generator = SystemRandomNumberGenerator()
+            var bytes = [UInt8]()
+            bytes.reserveCapacity(length)
 
-        return data
+            for _ in 0..<length {
+                bytes.append(UInt8.random(in: UInt8.min...UInt8.max, using: &generator))
+            }
+
+            return Data(bytes)
+        #endif
     }
 }
