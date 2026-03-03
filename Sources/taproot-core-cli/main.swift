@@ -20,7 +20,7 @@ struct swift_executable {
             currencyScale: 2,
             quantity: 43_000_000, // 43.000000% stake with scale 6
             quantityScale: 6,
-            unitType: "ownership_pct",
+            unitType: AssetUnitType.ownershipPercent.id,
             symbol: "SPACEX-XAI"
         )
 
@@ -31,7 +31,7 @@ struct swift_executable {
             currencyScale: 2,
             quantity: 507_500_000_000_000, // 507.5M shares with scale 6
             quantityScale: 6,
-            unitType: "shares",
+            unitType: AssetUnitType.share.id,
             symbol: "TSLA"
         )
 
@@ -42,7 +42,7 @@ struct swift_executable {
             currencyScale: 2,
             quantity: 50_000_000_000,
             quantityScale: 2,
-            unitType: "cash"
+            unitType: AssetUnitType.currency.id
         )
 
         let vault = Vault(
