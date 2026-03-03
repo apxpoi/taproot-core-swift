@@ -26,7 +26,16 @@ Build requirement:
 
 - Swift 6.x
 
-NOTICE: Taproot uses 64-bit fixed-point integers. Maximum representable value depends on scale.
+## 📏 System Limits
+
+V1
+
+- Configured max net worth / portfolio total (`TaprootLimitsV1.maxTotalAssetsValue`): `10,000,000,000,000` (10 trillion, base currency units).
+- Monetary value storage: `Int64` + `currencyScale` (`0...9`).
+- Max single monetary value formula at scale `s`: `Int64.max / 10^s`.
+- At maximum precision (`s = 9`), max single value is `9,223,372,036.854775807`.
+- At cent precision (`s = 2`), max single value is `92,233,720,368,547,758.07`.
+- Money string handling limits: `32` chars for processing, `24` chars for display.
 
 ## 🔐 Security Model
 
