@@ -70,4 +70,19 @@ final class AssetTests: XCTestCase {
             }
         }
     }
+
+    func testAssetTypeDisplayNameUsesUserFriendlyTerms() {
+        XCTAssertEqual(AssetType.equities.displayName, "Stocks")
+        XCTAssertEqual(AssetType.fixedIncome.displayName, "Bonds")
+        XCTAssertEqual(AssetType.etfsMutualFunds.displayName, "Funds (ETF/Mutual)")
+        XCTAssertEqual(AssetType.valuablesCollectibles.displayName, "Collectibles")
+    }
+
+    func testAssetTypeDisplayMetadataIsComplete() {
+        for assetType in AssetType.allCases {
+            XCTAssertFalse(assetType.displayName.isEmpty)
+            XCTAssertFalse(assetType.displayDescription.isEmpty)
+            XCTAssertFalse(assetType.displayGroup.rawValue.isEmpty)
+        }
+    }
 }
