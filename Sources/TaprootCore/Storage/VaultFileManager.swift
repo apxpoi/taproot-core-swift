@@ -1,86 +1,86 @@
 import Foundation
 
 public enum VaultFileError: Error {
-  case vaultNotFound
-  case invalidFileURL
+    case vaultNotFound
+    case invalidFileURL
 }
 
 public enum VaultFileManager {
-  public static func save(
-    encryptedData: Data,
-    named fileName: String
-  ) throws {
-    let _url = try url(for: fileName)
-    try encryptedData.write(to: _url, options: .atomic)
-  }
-
-  public static func load(
-    named fileName: String
-  ) throws -> Data {
-    let _url = try url(for: fileName)
-
-    guard FileManager.default.fileExists(atPath: _url.path) else {
-      throw VaultFileError.vaultNotFound
+    public static func save(
+        encryptedData: Data,
+        named fileName: String
+    ) throws {
+        let _url = try url(for: fileName)
+        try encryptedData.write(to: _url, options: .atomic)
     }
 
-    return try Data(contentsOf: _url)
-  }
+    public static func load(
+        named fileName: String
+    ) throws -> Data {
+        let _url = try url(for: fileName)
 
-  public static func delete(
-    named fileName: String
-  ) throws {
-    let _url = try url(for: fileName)
+        guard FileManager.default.fileExists(atPath: _url.path) else {
+            throw VaultFileError.vaultNotFound
+        }
 
-    guard FileManager.default.fileExists(atPath: _url.path) else {
-      throw VaultFileError.vaultNotFound
+        return try Data(contentsOf: _url)
     }
 
-    try FileManager.default.removeItem(at: _url)
-  }
+    public static func delete(
+        named fileName: String
+    ) throws {
+        let _url = try url(for: fileName)
 
-  public static func exists(
-    named fileName: String
-  ) throws -> Bool {
-    let _url = try url(for: fileName)
-    return FileManager.default.fileExists(atPath: _url.path)
-  }
+        guard FileManager.default.fileExists(atPath: _url.path) else {
+            throw VaultFileError.vaultNotFound
+        }
 
-  public static func list() throws -> [String] {
-    let _directory = try directory()
-
-    let files = try FileManager.default.contentsOfDirectory(
-      at: _directory,
-      includingPropertiesForKeys: nil
-    )
-
-    return files
-      .filter { $0.pathExtension == "tdf" }
-      .map { $0.deletingPathExtension().lastPathComponent }
-  }
-
-  private static func url(for fileName: String) throws -> URL {
-    let _directory = try directory()
-    return _directory.appendingPathComponent(fileName)
-      .appendingPathExtension("tdf")
-  }
-
-  private static func directory() throws -> URL {
-    guard let _url = FileManager.default.urls(
-      for: .documentDirectory,
-      in: .userDomainMask
-    ).first else {
-      throw VaultFileError.invalidFileURL
+        try FileManager.default.removeItem(at: _url)
     }
 
-    let vaultFolder = _url.appendingPathComponent("Taproot")
-
-    if !FileManager.default.fileExists(atPath: vaultFolder.path) {
-      try FileManager.default.createDirectory(
-        at: vaultFolder,
-        withIntermediateDirectories: true
-      )
+    public static func exists(
+        named fileName: String
+    ) throws -> Bool {
+        let _url = try url(for: fileName)
+        return FileManager.default.fileExists(atPath: _url.path)
     }
 
-    return vaultFolder
-  }
+    public static func list() throws -> [String] {
+        let _directory = try directory()
+
+        let files = try FileManager.default.contentsOfDirectory(
+            at: _directory,
+            includingPropertiesForKeys: nil
+        )
+
+        return files
+            .filter { $0.pathExtension == "tdf" }
+            .map { $0.deletingPathExtension().lastPathComponent }
+    }
+
+    private static func url(for fileName: String) throws -> URL {
+        let _directory = try directory()
+        return _directory.appendingPathComponent(fileName)
+            .appendingPathExtension("tdf")
+    }
+
+    private static func directory() throws -> URL {
+        guard let _url = FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first else {
+            throw VaultFileError.invalidFileURL
+        }
+
+        let vaultFolder = _url.appendingPathComponent("Taproot")
+
+        if !FileManager.default.fileExists(atPath: vaultFolder.path) {
+            try FileManager.default.createDirectory(
+                at: vaultFolder,
+                withIntermediateDirectories: true
+            )
+        }
+
+        return vaultFolder
+    }
 }

@@ -5,28 +5,27 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   build-and-test:
-    name: Build and Test with Swift ${{ matrix.swift }} on ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
-        swift: ["6.2"]
-    runs-on: ${{ matrix.os }}
-
+    name: Build and Test with Swift 6.2 on macOS
+    runs-on: macos-latest
     timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Up Swift ${{ matrix.swift }}
+      - name: Set Up Swift 6.2
         uses: swift-actions/setup-swift@v2
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: "6.2"
 
       - name: Swift Version
         run: swift --version
@@ -34,8 +33,11 @@ jobs:
       - name: Resolve Dependencies
         run: swift package resolve
 
-      - name: Build
-        run: swift build
+      - name: Run All Tests
+        run: swift test --parallel
 
-      - name: Test
-        run: swift test
+      - name: Build taproot-core-cli (Debug)
+        run: swift build --product taproot-core-cli
+
+      - name: Build taproot-core-cli (Release)
+        run: swift build -c release --product taproot-core-cli

@@ -1,0 +1,38 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "name": "Launch Swift Executable",
+      "preLaunchTask": "swift: Build Debug taproot-core-cli",
+      "program": "${workspaceFolder}/.build/debug/taproot-core-cli",
+      "args": [],
+      "env": {},
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Debug taproot-core-cli",
+      "target": "taproot-core-cli",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug taproot-core-cli"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Release taproot-core-cli",
+      "target": "taproot-core-cli",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release taproot-core-cli"
+    }
+  ]
+}

@@ -2,72 +2,72 @@
 import XCTest
 
 final class AssetTests: XCTestCase {
-  func testDecimalConversions() {
-    let asset = Asset(
-      id: UUID(),
-      type: "cash",
-      value: 123_456,
-      currency: "USD",
-      currencyScale: 2,
-      quantity: 52_310_000,
-      quantityScale: 6,
-      unitType: "unit"
-    )
+    func testDecimalConversions() {
+        let asset = Asset(
+            id: UUID(),
+            type: "cash",
+            value: 123_456,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 52_310_000,
+            quantityScale: 6,
+            unitType: "unit"
+        )
 
-    XCTAssertEqual(asset.decimalValue, Decimal(string: "1234.56"))
-    XCTAssertEqual(asset.decimalQuantity, Decimal(string: "52.31"))
-  }
-
-  func testValidateAcceptsInRangeScales() {
-    let asset = Asset(
-      id: UUID(),
-      type: "cash",
-      value: 100,
-      currency: "USD",
-      currencyScale: TaprootLimitsV1.maxCurrencyScale,
-      quantity: 1,
-      quantityScale: TaprootLimitsV1.maxQuantityScale,
-      unitType: "unit"
-    )
-
-    XCTAssertNoThrow(try asset.validate())
-  }
-
-  func testValidateRejectsCurrencyScaleOutOfRange() {
-    let asset = Asset(
-      id: UUID(),
-      type: "cash",
-      value: 100,
-      currency: "USD",
-      currencyScale: TaprootLimitsV1.maxCurrencyScale + 1,
-      quantity: 1,
-      quantityScale: 0,
-      unitType: "unit"
-    )
-
-    XCTAssertThrowsError(try asset.validate()) { error in
-      guard case AssetValidationError.invalidCurrencyScale = error else {
-        return XCTFail("Expected invalidCurrencyScale, got: \(error)")
-      }
+        XCTAssertEqual(asset.decimalValue, Decimal(string: "1234.56"))
+        XCTAssertEqual(asset.decimalQuantity, Decimal(string: "52.31"))
     }
-  }
 
-  func testValidateRejectsQuantityScaleOutOfRange() {
-    let asset = Asset(
-      id: UUID(),
-      type: "cash",
-      value: 100,
-      currency: "USD",
-      currencyScale: 0,
-      quantity: 1,
-      quantityScale: TaprootLimitsV1.maxQuantityScale + 1,
-      unitType: "unit"
-    )
+    func testValidateAcceptsInRangeScales() {
+        let asset = Asset(
+            id: UUID(),
+            type: "cash",
+            value: 100,
+            currency: "USD",
+            currencyScale: TaprootLimitsV1.maxCurrencyScale,
+            quantity: 1,
+            quantityScale: TaprootLimitsV1.maxQuantityScale,
+            unitType: "unit"
+        )
 
-    XCTAssertThrowsError(try asset.validate()) { error in
-      guard case AssetValidationError.invalidQuantityScale = error else {
-        return XCTFail("Expected invalidQuantityScale, got: \(error)")
-      }
+        XCTAssertNoThrow(try asset.validate())
     }
-  }
+
+    func testValidateRejectsCurrencyScaleOutOfRange() {
+        let asset = Asset(
+            id: UUID(),
+            type: "cash",
+            value: 100,
+            currency: "USD",
+            currencyScale: TaprootLimitsV1.maxCurrencyScale + 1,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: "unit"
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.invalidCurrencyScale = error else {
+                return XCTFail("Expected invalidCurrencyScale, got: \(error)")
+            }
+        }
+    }
+
+    func testValidateRejectsQuantityScaleOutOfRange() {
+        let asset = Asset(
+            id: UUID(),
+            type: "cash",
+            value: 100,
+            currency: "USD",
+            currencyScale: 0,
+            quantity: 1,
+            quantityScale: TaprootLimitsV1.maxQuantityScale + 1,
+            unitType: "unit"
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.invalidQuantityScale = error else {
+                return XCTFail("Expected invalidQuantityScale, got: \(error)")
+            }
+        }
+    }
 }

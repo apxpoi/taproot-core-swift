@@ -1,7 +1,7 @@
 import Foundation
 
 // Global financial constraints used by Taproot.
-// These limits protect again overflow, corruption, and unrealistic precision in flexed-point arithmetic.
+// These limits protect against overflow, corruption, and unrealistic precision in fixed-point arithmetic.
 
 public enum TaprootLimitsV1 {
     // Currency decimal precision limit.
@@ -20,6 +20,21 @@ public enum TaprootLimitsV1 {
 
     public static let maxCurrencyScale = 9
     public static let minCurrencyScale = 0
+
+    // Portfolio-wide maximum total value in base currency units.
+    //
+    // Chosen to keep headroom above current top individual wealth levels while
+    // preserving deterministic offline behavior.
+    //
+    // Value: 10,000,000,000,000 (10 trillion)
+    public static let maxTotalAssetsValue = Decimal(10_000_000_000_000)
+
+    // Character limits for money string handling.
+    //
+    // Processing limit protects parsing/normalization paths from oversized input.
+    // Display limit keeps rendered values compact and consistent in UI surfaces.
+    public static let maxMoneyProcessingCharacters = 32
+    public static let maxMoneyDisplayCharacters = 24
 
     // Asset quantity precision limit.
     //

@@ -1,7 +1,7 @@
 import Crypto
 import Foundation
 #if canImport(Security)
-import Security
+    import Security
 #endif
 
 public enum VaultCryptoError: Error {
@@ -74,8 +74,8 @@ public enum VaultCrypto {
             var bytes = [UInt8]()
             bytes.reserveCapacity(length)
 
-            for _ in 0..<length {
-                bytes.append(UInt8.random(in: UInt8.min...UInt8.max, using: &generator))
+            for _ in 0 ..< length {
+                bytes.append(UInt8.random(in: UInt8.min ... UInt8.max, using: &generator))
             }
 
             return Data(bytes)

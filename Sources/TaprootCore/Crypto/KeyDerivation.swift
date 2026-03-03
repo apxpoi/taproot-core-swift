@@ -39,7 +39,7 @@ public enum KeyDerivation {
         var derivedKey = Data()
         derivedKey.reserveCapacity(blockCount * hashLength)
 
-        for blockIndex in 1...blockCount {
+        for blockIndex in 1 ... blockCount {
             var blockIndexBE = UInt32(blockIndex).bigEndian
             var blockInput = Data(salt)
             withUnsafeBytes(of: &blockIndexBE) { blockInput.append(contentsOf: $0) }
@@ -48,7 +48,7 @@ public enum KeyDerivation {
             var t = u
 
             if iterations > 1 {
-                for _ in 2...iterations {
+                for _ in 2 ... iterations {
                     u = hmacSHA256(key: password, data: Data(u))
                     xorInPlace(&t, with: u)
                 }
