@@ -26,6 +26,35 @@ Build requirement:
 
 - Swift 6.x
 
+## 🛠️ Build on macOS
+
+Prerequisites:
+
+- macOS 13 or later
+- Xcode 16+ (or Swift 6.x toolchain with Command Line Tools)
+- Local dependency available at `../../giant-stone/iso3166-swift`
+
+Build and test:
+
+```bash
+# from repository root
+swift package resolve
+swift build
+swift test
+```
+
+Run the demo CLI target:
+
+```bash
+swift run taproot-core-cli
+```
+
+If dependency resolution fails, make sure `iso3166-swift` exists at:
+
+```text
+../../giant-stone/iso3166-swift
+```
+
 ## 📏 System Limits
 
 V1
