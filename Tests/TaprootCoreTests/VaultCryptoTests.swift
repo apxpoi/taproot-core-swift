@@ -34,6 +34,28 @@ final class VaultCryptoTests: XCTestCase {
         XCTAssertEqual(decrypted.accounts.first?.assets.first?.value, 15000)
     }
 
+    func testEncryptPersistsCustomKDFIterations() throws {
+        let vault = Vault(baseCurrency: "USD")
+        let password = "test-password"
+        let customKDF = KeyDerivationParameters(
+            algorithm: .pbkdf2SHA256,
+            iterations: 5_000
+        )
+
+        let encrypted = try VaultCrypto.encrypt(
+            vault: vault,
+            password: password,
+            keyDerivation: customKDF
+        )
+
+        let parsed = try VaultContainer.parseWithMetadata(data: encrypted)
+        XCTAssertEqual(parsed.formatVersion, 1)
+        XCTAssertEqual(parsed.keyDerivation, customKDF)
+
+        let decrypted = try VaultCrypto.decrypt(data: encrypted, password: password)
+        XCTAssertEqual(decrypted.baseCurrency, "USD")
+    }
+
     func testDecryptWithWrongPasswordThrows() throws {
         let vault = Vault(baseCurrency: "USD")
         let encrypted = try VaultCrypto.encrypt(vault: vault, password: "right-password")

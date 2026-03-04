@@ -49,12 +49,6 @@ Run the demo CLI target:
 swift run taproot-core-cli
 ```
 
-If dependency resolution fails, make sure `iso3166-swift` exists at:
-
-```text
-../../giant-stone/iso3166-swift
-```
-
 ## 📏 System Limits
 
 V1
@@ -91,7 +85,10 @@ Binary layout:
 
 ```text
 | MAGIC HEADER (TAPROOT1) |
-| 16-byte salt |
+| KDF algorithm id (1 byte) |
+| KDF iterations (4 bytes, big-endian) |
+| salt length (1 byte) |
+| salt |
 | AES-GCM ciphertext |
 ```
 

@@ -13,7 +13,8 @@ public enum VaultCryptoError: Error {
 public enum VaultCrypto {
     public static func encrypt(
         vault: Vault,
-        password: String
+        password: String,
+        keyDerivation: KeyDerivationParameters = .default
     ) throws -> Data {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -21,7 +22,11 @@ public enum VaultCrypto {
         let jsonData = try encoder.encode(vault)
 
         let salt = try randomData(length: 16)
-        let key = try KeyDerivation.deriveKey(password: password, salt: salt)
+        let key = try KeyDerivation.deriveKey(
+            password: password,
+            salt: salt,
+            parameters: keyDerivation
+        )
 
         let sealedBox = try AES.GCM.seal(jsonData, using: key)
 
@@ -29,9 +34,10 @@ public enum VaultCrypto {
             throw VaultCryptoError.encryptionFailed
         }
 
-        return VaultContainer.build(
+        return try VaultContainer.build(
             salt: salt,
-            ciphertext: combined
+            ciphertext: combined,
+            keyDerivation: keyDerivation
         )
     }
 
@@ -39,9 +45,13 @@ public enum VaultCrypto {
         data: Data,
         password: String
     ) throws -> Vault {
-        let container = try VaultContainer.parse(data: data)
+        let container = try VaultContainer.parseWithMetadata(data: data)
 
-        let key = try KeyDerivation.deriveKey(password: password, salt: container.salt)
+        let key = try KeyDerivation.deriveKey(
+            password: password,
+            salt: container.salt,
+            parameters: container.keyDerivation
+        )
 
         let sealedBox = try AES.GCM.SealedBox(combined: container.ciphertext)
         let decrypted = try AES.GCM.open(sealedBox, using: key)

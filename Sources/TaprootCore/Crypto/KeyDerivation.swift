@@ -6,26 +6,65 @@ public enum KeyDerivationError: Error {
     case keyDerivationFailed(status: Int32)
 }
 
+public enum KeyDerivationAlgorithm: UInt8, Codable, Sendable {
+    case pbkdf2SHA256 = 1
+}
+
+public struct KeyDerivationParameters: Codable, Equatable, Sendable {
+    public var algorithm: KeyDerivationAlgorithm
+    public var iterations: Int
+
+    public static let `default` = KeyDerivationParameters()
+
+    public init(
+        algorithm: KeyDerivationAlgorithm = .pbkdf2SHA256,
+        iterations: Int = TaprootLimitsV1.defaultPBKDF2Iterations
+    ) {
+        self.algorithm = algorithm
+        self.iterations = iterations
+    }
+}
+
 public enum KeyDerivation {
     public static func deriveKey(
         password: String,
         salt: Data,
         iterations: Int = TaprootLimitsV1.defaultPBKDF2Iterations
     ) throws -> SymmetricKey {
-        guard iterations > 0 else {
+        let parameters = KeyDerivationParameters(
+            algorithm: .pbkdf2SHA256,
+            iterations: iterations
+        )
+
+        return try deriveKey(
+            password: password,
+            salt: salt,
+            parameters: parameters
+        )
+    }
+
+    public static func deriveKey(
+        password: String,
+        salt: Data,
+        parameters: KeyDerivationParameters = .default
+    ) throws -> SymmetricKey {
+        guard parameters.iterations > 0 else {
             throw KeyDerivationError.invalidIterationCount
         }
 
         let passwordData = Data(password.utf8)
 
-        let key = try pbkdf2SHA256(
-            password: passwordData,
-            salt: salt,
-            iterations: iterations,
-            keyLength: 32
-        )
+        switch parameters.algorithm {
+        case .pbkdf2SHA256:
+            let key = try pbkdf2SHA256(
+                password: passwordData,
+                salt: salt,
+                iterations: parameters.iterations,
+                keyLength: 32
+            )
 
-        return SymmetricKey(data: key)
+            return SymmetricKey(data: key)
+        }
     }
 
     private static func pbkdf2SHA256(

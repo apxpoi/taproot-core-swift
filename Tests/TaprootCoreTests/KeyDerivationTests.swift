@@ -76,6 +76,27 @@ final class KeyDerivationTests: XCTestCase {
         XCTAssertEqual(keyData(key1), keyData(key2))
     }
 
+    func testDeriveKeyWithParametersMatchesIterationBasedAPI() throws {
+        let password = "password"
+        let salt = Data("salt".utf8)
+
+        let legacyStyleKey = try KeyDerivation.deriveKey(
+            password: password,
+            salt: salt,
+            iterations: 4096
+        )
+        let parameterizedKey = try KeyDerivation.deriveKey(
+            password: password,
+            salt: salt,
+            parameters: KeyDerivationParameters(
+                algorithm: .pbkdf2SHA256,
+                iterations: 4096
+            )
+        )
+
+        XCTAssertEqual(keyData(legacyStyleKey), keyData(parameterizedKey))
+    }
+
     func testRejectsNonPositiveIterations() {
         XCTAssertThrowsError(
             try KeyDerivation.deriveKey(password: "secret", salt: Data([0x00]), iterations: 0)

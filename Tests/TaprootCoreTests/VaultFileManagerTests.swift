@@ -45,6 +45,26 @@ final class VaultFileManagerTests: XCTestCase {
         }
     }
 
+    func testRejectsUnsafeFileNames() {
+        let invalidNames = [
+            "",
+            "   ",
+            ".",
+            "..",
+            "../vault",
+            "vault/../other",
+            #"vault\..\other"#,
+        ]
+
+        for name in invalidNames {
+            XCTAssertThrowsError(try VaultFileManager.exists(named: name)) { error in
+                guard case VaultFileError.invalidFileName = error else {
+                    return XCTFail("Expected invalidFileName for '\(name)', got: \(error)")
+                }
+            }
+        }
+    }
+
     private func uniqueFileName() -> String {
         "taproot-test-\(UUID().uuidString)"
     }

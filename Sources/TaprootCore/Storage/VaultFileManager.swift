@@ -3,6 +3,7 @@ import Foundation
 public enum VaultFileError: Error {
     case vaultNotFound
     case invalidFileURL
+    case invalidFileName
 }
 
 public enum VaultFileManager {
@@ -59,9 +60,32 @@ public enum VaultFileManager {
     }
 
     private static func url(for fileName: String) throws -> URL {
+        let safeFileName = try sanitize(fileName: fileName)
         let _directory = try directory()
-        return _directory.appendingPathComponent(fileName)
+        return _directory.appendingPathComponent(safeFileName)
             .appendingPathExtension("tdf")
+    }
+
+    private static func sanitize(fileName: String) throws -> String {
+        let trimmed = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw VaultFileError.invalidFileName
+        }
+
+        guard trimmed != ".", trimmed != ".." else {
+            throw VaultFileError.invalidFileName
+        }
+
+        guard !trimmed.contains("/"), !trimmed.contains("\\") else {
+            throw VaultFileError.invalidFileName
+        }
+
+        let lastPathComponent = URL(fileURLWithPath: trimmed).lastPathComponent
+        guard lastPathComponent == trimmed else {
+            throw VaultFileError.invalidFileName
+        }
+
+        return trimmed
     }
 
     private static func directory() throws -> URL {
