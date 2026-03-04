@@ -111,7 +111,7 @@ public enum AssetType: String, CaseIterable, Identifiable, Hashable {
         case .cash:
             return "Cash"
         case .certificatesOfDeposit:
-            return "Fixed Deposits (CDs)"
+            return "Fixed Deposits"
         case .foreignCurrency:
             return "Foreign Cash"
         case .equities:
@@ -119,7 +119,7 @@ public enum AssetType: String, CaseIterable, Identifiable, Hashable {
         case .fixedIncome:
             return "Bonds"
         case .etfsMutualFunds:
-            return "Funds (ETF/Mutual)"
+            return "ETFs & Funds"
         case .derivatives:
             return "Options & Futures"
         case .realEstate:
@@ -238,10 +238,10 @@ public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable
     case contract = "Contract" // Derivatives such as options/futures.
 
     // Real Assets (Tangible/Fixed Assets)
-    case kilo = "Kilo (k)" // 1,000 of a base unit.
+    case gram = "Gram (g)" // 1,000 of a base unit.
     case kilogram = "Kilogram (kg)"
     case tael = "Tael" // Traditional bullion unit used in Hong Kong and Macau.
-    case troyOunce = "Troy Ounce"
+    case troyOunce = "Troy Ounce (ozt)"
     case squareMeter = "Square Meter"
     case item = "Item" // Discrete physical count (for example, 3 watches).
 
