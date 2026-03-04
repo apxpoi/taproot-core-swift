@@ -1,6 +1,6 @@
 # Taproot Core Swift
 
-Taproot Core Swift is the open cryptographic foundation of **Taproot Bookkeeping**.
+Taproot Core Swift is the publicly auditable cryptographic foundation of **Taproot Bookkeeping**.
 
 It provides:
 
@@ -117,14 +117,15 @@ This repository is the **reference implementation** of the Taproot vault format.
 
 Taproot Core exists to:
 
-- Provide an open, auditable vault format
+- Provide a publicly auditable vault format
 - Build trust through transparency
 - Enable independent verification
 - Serve as the foundation of Taproot
 
 ## ❗ Non-Commercial License
 
-This project is source-available.
+This project is source-available (MIT + Commons Clause).
+It is **not** an OSI-approved open-source license.
 
 You may:
 
