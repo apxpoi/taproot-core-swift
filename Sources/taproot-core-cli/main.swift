@@ -45,29 +45,61 @@ struct swift_executable {
             unitType: AssetUnitType.currency.id
         )
 
+        let gold = Asset(
+            type: AssetType.commodities.id,
+            value: 4_755_700,
+            currency: Iso3166.HKD.alphabeticCode,
+            currencyScale: 2,
+            quantity: 1, // 1 tael is approx. 37.43g to 37.5g
+            quantityScale: 0,
+            unitType: AssetUnitType.tael.id
+        )
+
         let vault = Vault(
             version: 1,
             createdAt: snapshotDate,
             baseCurrency: Iso3166.USD.alphabeticCode,
             accounts: [
                 Account(
-                    displayName: "Some One",
+                    displayName: "Taproot Bot Wall-E",
                     assets: [
                         spacexAi,
                         tesla,
                         cash,
                     ],
-                    institution: "dark_hole"
+                    institution: Institution(
+                        id: "dark_hole",
+                        regionCode: "US",
+                        displayName: "Dark Hole Private Bank",
+                        category: .bank
+                    )
+                ),
+
+                Account(
+                    displayName: "Taproot Team",
+                    assets: [
+                        gold,
+                    ],
+                    institution: Institution.default
                 ),
             ]
         )
 
-        for asset in vault.accounts.flatMap(\.assets) {
+        for account in vault.accounts {
             do {
-                try asset.validate()
+                try account.institution.validate()
             } catch {
-                fputs("Invalid asset in demo data: \(error)\n", stderr)
+                fputs("Invalid institution in demo data: \(error)\n", stderr)
                 return
+            }
+
+            for asset in account.assets {
+                do {
+                    try asset.validate()
+                } catch {
+                    fputs("Invalid asset in demo data: \(error)\n", stderr)
+                    return
+                }
             }
         }
 

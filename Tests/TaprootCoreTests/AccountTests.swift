@@ -24,7 +24,11 @@ final class AccountTests: XCTestCase {
             middleName: "M",
             lastName: "Lovelace",
             type: "broker",
-            institution: "Fidelity"
+            institution: Institution(
+                id: "fidelity",
+                regionCode: "US",
+                displayName: "Fidelity"
+            )
         )
 
         XCTAssertEqual(account.id, accountID)
@@ -35,6 +39,81 @@ final class AccountTests: XCTestCase {
         XCTAssertEqual(account.type, "broker")
         XCTAssertEqual(account.assets.count, 1)
         XCTAssertEqual(account.assets.first?.id, assetID)
-        XCTAssertEqual(account.institution, "Fidelity")
+        XCTAssertEqual(account.institution.id, "fidelity")
+    }
+
+    func testDecodesInstitutionObject() throws {
+        let data = Data(
+            """
+            {
+              "id": "123E4567-E89B-12D3-A456-426614174000",
+              "firstName": "",
+              "middleName": "",
+              "lastName": "",
+              "displayName": "Brokerage",
+              "type": "personal",
+              "assets": [],
+              "institution": {
+                "id": "structured-bank",
+                "regionCode": "US",
+                "displayName": "Structured Bank"
+              }
+            }
+            """.utf8
+        )
+
+        let decoder = JSONDecoder()
+        let account = try decoder.decode(Account.self, from: data)
+
+        XCTAssertEqual(account.institution.id, "structured-bank")
+        XCTAssertEqual(account.institution.regionCode, "US")
+        XCTAssertEqual(account.institution.displayName, "Structured Bank")
+    }
+
+    func testResolvedInstitutionReturnsProviderValueWhenFound() {
+        let account = Account(
+            displayName: "Wallet",
+            assets: [],
+            institution: Institution(
+                id: "wise",
+                regionCode: "SG",
+                displayName: "Wise (Local)"
+            )
+        )
+
+        let provider = InMemoryInstitutionRepository(
+            institutions: [
+                Institution(
+                    id: "wise",
+                    regionCode: "SG",
+                    displayName: "Wise",
+                    description: "Global payments and remittance",
+                    category: .paymentProvider
+                ),
+            ]
+        )
+
+        let resolved = account.resolvedInstitution(from: provider)
+
+        XCTAssertEqual(resolved.displayName, "Wise")
+        XCTAssertEqual(resolved.category, .paymentProvider)
+    }
+
+    func testResolvedInstitutionFallsBackToStoredValueWhenMissing() {
+        let accountInstitution = Institution(
+            id: "local-bank",
+            regionCode: "US",
+            displayName: "Local Bank"
+        )
+        let account = Account(
+            displayName: "Wallet",
+            assets: [],
+            institution: accountInstitution
+        )
+
+        let provider = InMemoryInstitutionRepository(institutions: [])
+        let resolved = account.resolvedInstitution(from: provider)
+
+        XCTAssertEqual(resolved, accountInstitution)
     }
 }

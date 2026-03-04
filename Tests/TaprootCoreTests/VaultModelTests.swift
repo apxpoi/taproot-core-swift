@@ -12,7 +12,15 @@ final class VaultModelTests: XCTestCase {
 
     func testInitializerCustomValues() {
         let createdAt = Date(timeIntervalSince1970: 1_700_000_000)
-        let account = Account(displayName: "Wallet", assets: [], institution: "Coinbase")
+        let account = Account(
+            displayName: "Wallet",
+            assets: [],
+            institution: Institution(
+                id: "coinbase",
+                regionCode: "US",
+                displayName: "Coinbase"
+            )
+        )
         let vault = Vault(
             version: 2,
             createdAt: createdAt,
@@ -42,7 +50,11 @@ final class VaultModelTests: XCTestCase {
         let account = Account(
             displayName: "Primary",
             assets: [asset],
-            institution: "Local Bank"
+            institution: Institution(
+                id: "local-bank",
+                regionCode: "US",
+                displayName: "Local Bank"
+            )
         )
         let vault = Vault(
             version: 7,
@@ -64,6 +76,7 @@ final class VaultModelTests: XCTestCase {
         XCTAssertEqual(decoded.baseCurrency, "USD")
         XCTAssertEqual(decoded.accounts.count, 1)
         XCTAssertEqual(decoded.accounts.first?.displayName, "Primary")
+        XCTAssertEqual(decoded.accounts.first?.institution.regionCode, "US")
         XCTAssertEqual(decoded.accounts.first?.assets.count, 1)
     }
 }

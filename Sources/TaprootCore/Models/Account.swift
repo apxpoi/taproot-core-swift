@@ -16,8 +16,8 @@ public struct Account: Codable, Identifiable, Hashable {
 
     public var assets: [Asset]
 
-    /// Optional the unique id (e.g. "the_company", "hsbc").
-    public var institution: String
+    /// Institution metadata for this account (for example: id "hsbc", region "HK").
+    public var institution: Institution
 
     public init(
         id: UUID = UUID(),
@@ -27,7 +27,7 @@ public struct Account: Codable, Identifiable, Hashable {
         middleName: String = "",
         lastName: String = "",
         type: String = "personal",
-        institution: String = "default"
+        institution: Institution = .default
     ) {
         self.id = id
 
@@ -42,5 +42,12 @@ public struct Account: Codable, Identifiable, Hashable {
         self.assets = assets
 
         self.institution = institution
+    }
+}
+
+public extension Account {
+    /// Returns provider-enriched institution metadata when available.
+    func resolvedInstitution(from provider: InstitutionProvider) -> Institution {
+        provider.institution(id: institution.id, regionCode: institution.regionCode) ?? institution
     }
 }

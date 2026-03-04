@@ -16,7 +16,11 @@ final class VaultCryptoTests: XCTestCase {
         let account = Account(
             displayName: "Main Wallet",
             assets: [asset],
-            institution: "Taproot"
+            institution: Institution(
+                id: "taproot",
+                regionCode: "US",
+                displayName: "Taproot"
+            )
         )
         let vault = Vault(baseCurrency: "USD", accounts: [account])
         let password = "test-password"
