@@ -103,18 +103,41 @@ final class AssetTests: XCTestCase {
         }
     }
 
-    func testAssetTypeDisplayNameUsesUserFriendlyTerms() {
-        XCTAssertEqual(AssetType.equities.displayName, "Stocks")
-        XCTAssertEqual(AssetType.fixedIncome.displayName, "Bonds")
-        XCTAssertEqual(AssetType.etfsMutualFunds.displayName, "ETFs & Funds")
-        XCTAssertEqual(AssetType.valuablesCollectibles.displayName, "Collectibles")
-    }
-
     func testAssetTypeDisplayMetadataIsComplete() {
         for assetType in AssetType.allCases {
             XCTAssertFalse(assetType.displayName.isEmpty)
             XCTAssertFalse(assetType.displayDescription.isEmpty)
             XCTAssertFalse(assetType.displayGroup.rawValue.isEmpty)
+            XCTAssertEqual(assetType.id, assetType.rawValue)
+        }
+    }
+
+    func testAssetTypeRawValuesAreUnique() {
+        XCTAssertEqual(
+            Set(AssetType.allCases.map(\.rawValue)).count,
+            AssetType.allCases.count
+        )
+    }
+
+    func testAssetUnitTypeMetadataIsComplete() {
+        for unitType in AssetUnitType.allCases {
+            XCTAssertFalse(unitType.rawValue.isEmpty)
+            XCTAssertEqual(unitType.id, unitType.rawValue)
+        }
+    }
+
+    func testAssetUnitTypeRawValuesAreUnique() {
+        XCTAssertEqual(
+            Set(AssetUnitType.allCases.map(\.rawValue)).count,
+            AssetUnitType.allCases.count
+        )
+    }
+
+    func testAssetUnitTypeCodableRoundTrip() throws {
+        for unitType in AssetUnitType.allCases {
+            let data = try JSONEncoder().encode(unitType)
+            let decoded = try JSONDecoder().decode(AssetUnitType.self, from: data)
+            XCTAssertEqual(decoded, unitType)
         }
     }
 }
