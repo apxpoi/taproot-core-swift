@@ -2,6 +2,38 @@
 import XCTest
 
 final class AssetTests: XCTestCase {
+    func testInitializerDefaultsNoteToEmptyString() {
+        let asset = Asset(
+            type: "cash",
+            value: 100,
+            currency: "USD",
+            currencyScale: 2
+        )
+
+        XCTAssertEqual(asset.note, "")
+    }
+
+    func testCodableRoundTripPreservesNote() throws {
+        let asset = Asset(
+            id: UUID(),
+            type: "cash",
+            value: 123_456,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: "unit",
+            symbol: "USD",
+            note: "Emergency fund"
+        )
+
+        let data = try JSONEncoder().encode(asset)
+        let decoded = try JSONDecoder().decode(Asset.self, from: data)
+
+        XCTAssertEqual(decoded.note, "Emergency fund")
+        XCTAssertEqual(decoded, asset)
+    }
+
     func testDecimalConversions() {
         let asset = Asset(
             id: UUID(),
@@ -74,7 +106,7 @@ final class AssetTests: XCTestCase {
     func testAssetTypeDisplayNameUsesUserFriendlyTerms() {
         XCTAssertEqual(AssetType.equities.displayName, "Stocks")
         XCTAssertEqual(AssetType.fixedIncome.displayName, "Bonds")
-        XCTAssertEqual(AssetType.etfsMutualFunds.displayName, "Funds (ETF/Mutual)")
+        XCTAssertEqual(AssetType.etfsMutualFunds.displayName, "ETFs & Funds")
         XCTAssertEqual(AssetType.valuablesCollectibles.displayName, "Collectibles")
     }
 

@@ -24,6 +24,8 @@ public struct Asset: Codable, Identifiable, Hashable {
     /// Human-readable symbol for the asset (e.g. "QQQ", "AAPL").
     public var symbol: String
 
+    public var note: String
+
     public init(
         id: UUID = UUID(),
         type: String,
@@ -33,7 +35,8 @@ public struct Asset: Codable, Identifiable, Hashable {
         quantity: Int64 = 1,
         quantityScale: Int = 0,
         unitType: String = "",
-        symbol: String = ""
+        symbol: String = "",
+        note: String = ""
     ) {
         self.id = id
 
@@ -49,6 +52,8 @@ public struct Asset: Codable, Identifiable, Hashable {
         self.unitType = unitType
 
         self.symbol = symbol
+
+        self.note = note
     }
 }
 
