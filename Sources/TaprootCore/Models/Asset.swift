@@ -18,7 +18,7 @@ public struct Asset: Codable, Identifiable, Hashable {
     public var quantityScale: Int
 
     // Unit label for quantity measurement.
-    // Example: "Share", "Token", "Kilogram (kg)", "Currency".
+    // Example: "Share", "Token", "Kilogram (kg)", "Unit".
     public var unitType: String
 
     /// Human-readable symbol for the asset (e.g. "QQQ", "AAPL").
@@ -236,7 +236,7 @@ public enum AssetTypeDisplayGroup: String, CaseIterable, Identifiable, Hashable 
 
 public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable {
     /// Liquid Assets (Cash & Cash Equivalents)
-    case currency = "Currency" // Cash-like quantity in fiat units.
+    case unit = "Unit" // Cash-like quantity in fiat units.
 
     // Marketable Securities (Public Investments)
     case share = "Share" // Equities, funds, and similar holdings.
@@ -256,8 +256,7 @@ public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable
     /// Private & Business Assets
     case ownershipPercent = "Ownership Percent" // 0-100 range with quantityScale.
 
-    // Generic / Other
-    case unit = "Unit" // Generic count when no specific unit applies.
+    /// Other
     case other = "Other"
 
     public var id: String {

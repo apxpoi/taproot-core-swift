@@ -42,7 +42,7 @@ struct swift_executable {
             currencyScale: 2,
             quantity: 50_000_000_000,
             quantityScale: 2,
-            unitType: AssetUnitType.currency.id
+            unitType: AssetUnitType.unit.id
         )
 
         let gold = Asset(
