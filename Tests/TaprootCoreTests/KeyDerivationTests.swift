@@ -107,6 +107,20 @@ final class KeyDerivationTests: XCTestCase {
         }
     }
 
+    func testRejectsIterationsAboveMaximum() {
+        XCTAssertThrowsError(
+            try KeyDerivation.deriveKey(
+                password: "secret",
+                salt: Data([0x00]),
+                iterations: TaprootLimitsV1.maxPBKDF2Iterations + 1
+            )
+        ) { error in
+            guard case KeyDerivationError.invalidIterationCount = error else {
+                return XCTFail("Expected invalidIterationCount, got: \(error)")
+            }
+        }
+    }
+
     private func keyData(_ key: SymmetricKey) -> Data {
         key.withUnsafeBytes { Data($0) }
     }

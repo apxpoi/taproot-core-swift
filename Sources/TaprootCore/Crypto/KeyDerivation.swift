@@ -48,7 +48,10 @@ public enum KeyDerivation {
         salt: Data,
         parameters: KeyDerivationParameters = .default
     ) throws -> SymmetricKey {
-        guard parameters.iterations > 0 else {
+        guard
+            parameters.iterations >= TaprootLimitsV1.minPBKDF2Iterations,
+            parameters.iterations <= TaprootLimitsV1.maxPBKDF2Iterations
+        else {
             throw KeyDerivationError.invalidIterationCount
         }
 

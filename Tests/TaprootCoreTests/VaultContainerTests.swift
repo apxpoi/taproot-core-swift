@@ -68,4 +68,43 @@ final class VaultContainerTests: XCTestCase {
             XCTAssertEqual(rawValue, 0xFF)
         }
     }
+
+    func testBuildRejectsIterationsAboveMaximum() {
+        let keyDerivation = KeyDerivationParameters(
+            algorithm: .pbkdf2SHA256,
+            iterations: TaprootLimitsV1.maxPBKDF2Iterations + 1
+        )
+
+        XCTAssertThrowsError(
+            try VaultContainer.build(
+                salt: Data(repeating: 0x11, count: 16),
+                ciphertext: Data([0xAA]),
+                keyDerivation: keyDerivation
+            )
+        ) { error in
+            guard case VaultContainerError.invalidKDFIterations = error else {
+                return XCTFail("Expected invalidKDFIterations, got: \(error)")
+            }
+        }
+    }
+
+    func testParseRejectsIterationsAboveMaximum() {
+        var data = VaultContainer.build(
+            salt: Data(repeating: 0x11, count: 16),
+            ciphertext: Data([0xAA])
+        )
+
+        let oversizedIterations = UInt32(TaprootLimitsV1.maxPBKDF2Iterations + 1)
+        let iterationStartIndex = VaultContainer.magic.count + 1
+        data[iterationStartIndex] = UInt8((oversizedIterations >> 24) & 0xFF)
+        data[iterationStartIndex + 1] = UInt8((oversizedIterations >> 16) & 0xFF)
+        data[iterationStartIndex + 2] = UInt8((oversizedIterations >> 8) & 0xFF)
+        data[iterationStartIndex + 3] = UInt8(oversizedIterations & 0xFF)
+
+        XCTAssertThrowsError(try VaultContainer.parseWithMetadata(data: data)) { error in
+            guard case VaultContainerError.invalidKDFIterations = error else {
+                return XCTFail("Expected invalidKDFIterations, got: \(error)")
+            }
+        }
+    }
 }

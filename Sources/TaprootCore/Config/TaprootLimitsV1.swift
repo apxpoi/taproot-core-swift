@@ -59,5 +59,7 @@ public enum TaprootLimitsV1 {
     /// - lower = better performance on mobile
     ///
     /// Can be adjusted in future versions.
+    public static let minPBKDF2Iterations = 1
+    public static let maxPBKDF2Iterations = 1_000_000
     public static let defaultPBKDF2Iterations = 100_000
 }

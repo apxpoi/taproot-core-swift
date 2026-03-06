@@ -16,6 +16,8 @@ public enum VaultCrypto {
         password: String,
         keyDerivation: KeyDerivationParameters = .default
     ) throws -> Data {
+        try vault.validate()
+
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
 
@@ -59,7 +61,9 @@ public enum VaultCrypto {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        return try decoder.decode(Vault.self, from: decrypted)
+        let vault = try decoder.decode(Vault.self, from: decrypted)
+        try vault.validate()
+        return vault
     }
 
     private static func randomData(length: Int) throws -> Data {

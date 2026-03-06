@@ -43,7 +43,11 @@ public enum VaultContainer {
         ciphertext: Data,
         keyDerivation: KeyDerivationParameters
     ) throws -> Data {
-        guard keyDerivation.iterations > 0, let iterations = UInt32(exactly: keyDerivation.iterations) else {
+        guard
+            keyDerivation.iterations >= TaprootLimitsV1.minPBKDF2Iterations,
+            keyDerivation.iterations <= TaprootLimitsV1.maxPBKDF2Iterations,
+            let iterations = UInt32(exactly: keyDerivation.iterations)
+        else {
             throw VaultContainerError.invalidKDFIterations
         }
         guard !salt.isEmpty, salt.count <= Int(UInt8.max) else {
@@ -117,7 +121,11 @@ public enum VaultContainer {
         let iterationEndIndex = iterationStartIndex + 4
         let iterations = data[iterationStartIndex ..< iterationEndIndex]
             .reduce(UInt32(0)) { ($0 << 8) | UInt32($1) }
-        guard iterations > 0 else {
+        let iterationValue = Int(iterations)
+        guard
+            iterationValue >= TaprootLimitsV1.minPBKDF2Iterations,
+            iterationValue <= TaprootLimitsV1.maxPBKDF2Iterations
+        else {
             throw VaultContainerError.invalidKDFIterations
         }
 
@@ -140,7 +148,7 @@ public enum VaultContainer {
             formatVersion: 1,
             keyDerivation: KeyDerivationParameters(
                 algorithm: algorithm,
-                iterations: Int(iterations)
+                iterations: iterationValue
             ),
             salt: salt,
             ciphertext: ciphertext

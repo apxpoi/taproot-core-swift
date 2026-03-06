@@ -79,4 +79,42 @@ final class VaultModelTests: XCTestCase {
         XCTAssertEqual(decoded.accounts.first?.institution.regionCode, "US")
         XCTAssertEqual(decoded.accounts.first?.assets.count, 1)
     }
+
+    func testValidateAcceptsPortfolioTotalAtMaximum() throws {
+        let vault = Vault(
+            baseCurrency: "USD",
+            accounts: [
+                Account(
+                    displayName: "Wallet",
+                    assets: [
+                        Asset(type: "cash", value: 10_000_000_000_000, currency: "USD", currencyScale: 0),
+                    ],
+                    institution: Institution(id: "taproot", regionCode: "US", displayName: "Taproot")
+                ),
+            ]
+        )
+
+        XCTAssertNoThrow(try vault.validate())
+    }
+
+    func testValidateRejectsPortfolioTotalAboveMaximum() {
+        let vault = Vault(
+            baseCurrency: "USD",
+            accounts: [
+                Account(
+                    displayName: "Wallet",
+                    assets: [
+                        Asset(type: "cash", value: 10_000_000_000_001, currency: "USD", currencyScale: 0),
+                    ],
+                    institution: Institution(id: "taproot", regionCode: "US", displayName: "Taproot")
+                ),
+            ]
+        )
+
+        XCTAssertThrowsError(try vault.validate()) { error in
+            guard case VaultValidationError.exceedsMaxTotalAssetsValue = error else {
+                return XCTFail("Expected exceedsMaxTotalAssetsValue, got: \(error)")
+            }
+        }
+    }
 }

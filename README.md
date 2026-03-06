@@ -32,7 +32,7 @@ Prerequisites:
 
 - macOS 13 or later
 - Xcode 16+ (or Swift 6.x toolchain with Command Line Tools)
-- Local dependency available at `../../giant-stone/iso3166-swift`
+- Internet access to fetch Swift Package dependencies from GitHub
 
 Build and test:
 
@@ -58,6 +58,7 @@ V1
 - Max single monetary value formula at scale `s`: `Int64.max / 10^s`.
 - At maximum precision (`s = 9`), max single value is `9,223,372,036.854775807`.
 - At cent precision (`s = 2`), max single value is `92,233,720,368,547,758.07`.
+- Portfolio total validation rejects values above `TaprootLimitsV1.maxTotalAssetsValue`.
 - Money string handling limits: `32` chars for processing, `24` chars for display.
 
 ## 🔐 Security Model
