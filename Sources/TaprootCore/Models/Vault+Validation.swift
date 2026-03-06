@@ -6,15 +6,18 @@ public enum VaultValidationError: Error, Equatable {
 
 public extension Vault {
     func validate() throws {
-        // Assumes asset values have already been normalized by the caller into a
-        // comparable monetary unit for portfolio-level checks.
-        let portfolioTotal = accounts
-            .flatMap(\.assets)
-            .reduce(Decimal.zero) { $0 + $1.decimalValue }
+        for account in accounts {
+            try account.institution.validate()
+            for asset in account.assets {
+                try asset.validate()
+            }
+        }
+    }
 
-        guard portfolioTotal <= TaprootLimitsV1.maxTotalAssetsValue else {
+    func validatePortfolioTotal(baseCurrencyTotal: Decimal) throws {
+        guard baseCurrencyTotal <= TaprootLimitsV1.maxTotalAssetsValue else {
             throw VaultValidationError.exceedsMaxTotalAssetsValue(
-                actual: portfolioTotal,
+                actual: baseCurrencyTotal,
                 maximum: TaprootLimitsV1.maxTotalAssetsValue
             )
         }

@@ -63,26 +63,31 @@ final class VaultCryptoTests: XCTestCase {
         XCTAssertThrowsError(try VaultCrypto.decrypt(data: encrypted, password: "wrong-password"))
     }
 
-    func testEncryptRejectsVaultAboveMaxTotalAssetsValue() {
-        let oversizedAsset = Asset(
+    func testEncryptDecryptSupportsMixedCurrencyVault() throws {
+        let usdAsset = Asset(
             type: "cash",
             value: 10_000_000_000_001,
             currency: "USD",
             currencyScale: 0
         )
+        let eurAsset = Asset(
+            type: "cash",
+            value: 9_999_999_999_999,
+            currency: "EUR",
+            currencyScale: 0
+        )
         let account = Account(
             displayName: "Main Wallet",
-            assets: [oversizedAsset],
+            assets: [usdAsset, eurAsset],
             institution: Institution(id: "taproot", regionCode: "US", displayName: "Taproot")
         )
         let vault = Vault(baseCurrency: "USD", accounts: [account])
 
-        XCTAssertThrowsError(
-            try VaultCrypto.encrypt(vault: vault, password: "test-password")
-        ) { error in
-            guard case VaultValidationError.exceedsMaxTotalAssetsValue = error else {
-                return XCTFail("Expected exceedsMaxTotalAssetsValue, got: \(error)")
-            }
-        }
+        let encrypted = try VaultCrypto.encrypt(vault: vault, password: "test-password")
+        let decrypted = try VaultCrypto.decrypt(data: encrypted, password: "test-password")
+
+        XCTAssertEqual(decrypted.accounts.first?.assets.count, 2)
+        XCTAssertEqual(decrypted.accounts.first?.assets.first?.currency, "USD")
+        XCTAssertEqual(decrypted.accounts.first?.assets.last?.currency, "EUR")
     }
 }

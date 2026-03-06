@@ -80,14 +80,34 @@ final class VaultModelTests: XCTestCase {
         XCTAssertEqual(decoded.accounts.first?.assets.count, 1)
     }
 
-    func testValidateAcceptsPortfolioTotalAtMaximum() throws {
+    func testValidatePortfolioTotalAcceptsMaximum() throws {
+        let vault = Vault(baseCurrency: "USD")
+        XCTAssertNoThrow(
+            try vault.validatePortfolioTotal(baseCurrencyTotal: TaprootLimitsV1.maxTotalAssetsValue)
+        )
+    }
+
+    func testValidatePortfolioTotalRejectsAboveMaximum() {
+        let vault = Vault(baseCurrency: "USD")
+
+        XCTAssertThrowsError(
+            try vault.validatePortfolioTotal(baseCurrencyTotal: TaprootLimitsV1.maxTotalAssetsValue + 1)
+        ) { error in
+            guard case VaultValidationError.exceedsMaxTotalAssetsValue = error else {
+                return XCTFail("Expected exceedsMaxTotalAssetsValue, got: \(error)")
+            }
+        }
+    }
+
+    func testValidateAcceptsMixedCurrencyVaultStructure() throws {
         let vault = Vault(
             baseCurrency: "USD",
             accounts: [
                 Account(
                     displayName: "Wallet",
                     assets: [
-                        Asset(type: "cash", value: 10_000_000_000_000, currency: "USD", currencyScale: 0),
+                        Asset(type: "cash", value: 10_000_000_000_001, currency: "USD", currencyScale: 0),
+                        Asset(type: "cash", value: 9_999_999_999_999, currency: "EUR", currencyScale: 0),
                     ],
                     institution: Institution(id: "taproot", regionCode: "US", displayName: "Taproot")
                 ),
@@ -97,23 +117,23 @@ final class VaultModelTests: XCTestCase {
         XCTAssertNoThrow(try vault.validate())
     }
 
-    func testValidateRejectsPortfolioTotalAboveMaximum() {
+    func testValidateRejectsInvalidInstitutionStructure() {
         let vault = Vault(
             baseCurrency: "USD",
             accounts: [
                 Account(
                     displayName: "Wallet",
                     assets: [
-                        Asset(type: "cash", value: 10_000_000_000_001, currency: "USD", currencyScale: 0),
+                        Asset(type: "cash", value: 100, currency: "USD", currencyScale: 0),
                     ],
-                    institution: Institution(id: "taproot", regionCode: "US", displayName: "Taproot")
+                    institution: Institution(id: "taproot", regionCode: "USA", displayName: "Taproot")
                 ),
             ]
         )
 
         XCTAssertThrowsError(try vault.validate()) { error in
-            guard case VaultValidationError.exceedsMaxTotalAssetsValue = error else {
-                return XCTFail("Expected exceedsMaxTotalAssetsValue, got: \(error)")
+            guard case InstitutionValidationError.invalidRegionCode = error else {
+                return XCTFail("Expected invalidRegionCode, got: \(error)")
             }
         }
     }
