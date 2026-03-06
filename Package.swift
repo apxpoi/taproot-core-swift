@@ -22,7 +22,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
-        .package(path: "../../giant-stone/iso3166-swift"),
+        .package(url: "https://github.com/giant-stone/iso3166-swift", from: "2026.3.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

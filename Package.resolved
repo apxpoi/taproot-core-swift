@@ -1,6 +1,15 @@
 {
-  "originHash" : "068029155b07011f7b4c8b4be5e1feabf6370fc5b57c9ffd2f3af8038440a714",
+  "originHash" : "c150dc3deb36d9d21eea3693fb36c8374489b17d8716635b8e059fc2195fd7a1",
   "pins" : [
+    {
+      "identity" : "iso3166-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/giant-stone/iso3166-swift",
+      "state" : {
+        "revision" : "2e621a621d13a6b46ec2b01c8473bd5c2ddeaa62",
+        "version" : "2026.3.1"
+      }
+    },
     {
       "identity" : "swift-asn1",
       "kind" : "remoteSourceControl",
