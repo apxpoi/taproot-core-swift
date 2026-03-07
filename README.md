@@ -1,6 +1,6 @@
 # Taproot Core Swift
 
-Taproot Core Swift is the open cryptographic foundation of **Taproot Bookkeeping**.
+Taproot Core Swift is the publicly auditable cryptographic foundation of **Taproot Bookkeeping**.
 
 It provides:
 
@@ -26,7 +26,40 @@ Build requirement:
 
 - Swift 6.x
 
-NOTICE: Taproot uses 64-bit fixed-point integers. Maximum representable value depends on scale.
+## 🛠️ Build on macOS
+
+Prerequisites:
+
+- macOS 13 or later
+- Xcode 16+ (or Swift 6.x toolchain with Command Line Tools)
+- Internet access to fetch Swift Package dependencies from GitHub
+
+Build and test:
+
+```bash
+# from repository root
+swift package resolve
+swift build
+swift test
+```
+
+Run the demo CLI target:
+
+```bash
+swift run taproot-core-cli
+```
+
+## 📏 System Limits
+
+V1
+
+- Configured max net worth / portfolio total (`TaprootLimitsV1.maxTotalAssetsValue`): `10,000,000,000,000` (10 trillion, base currency units).
+- Monetary value storage: `Int64` + `currencyScale` (`0...9`).
+- Max single monetary value formula at scale `s`: `Int64.max / 10^s`.
+- At maximum precision (`s = 9`), max single value is `9,223,372,036.854775807`.
+- At cent precision (`s = 2`), max single value is `92,233,720,368,547,758.07`.
+- Use `Vault.validatePortfolioTotal(baseCurrencyTotal:)` after normalizing portfolio values into `baseCurrency`.
+- Money string handling limits: `32` chars for processing, `24` chars for display.
 
 ## 🔐 Security Model
 
@@ -53,7 +86,10 @@ Binary layout:
 
 ```text
 | MAGIC HEADER (TAPROOT1) |
-| 16-byte salt |
+| KDF algorithm id (1 byte) |
+| KDF iterations (4 bytes, big-endian) |
+| salt length (1 byte) |
+| salt |
 | AES-GCM ciphertext |
 ```
 
@@ -82,14 +118,15 @@ This repository is the **reference implementation** of the Taproot vault format.
 
 Taproot Core exists to:
 
-- Provide an open, auditable vault format
+- Provide a publicly auditable vault format
 - Build trust through transparency
 - Enable independent verification
 - Serve as the foundation of Taproot
 
 ## ❗ Non-Commercial License
 
-This project is source-available.
+This project is source-available (MIT + Commons Clause).
+It is **not** an OSI-approved open-source license.
 
 You may:
 

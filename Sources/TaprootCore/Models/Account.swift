@@ -1,33 +1,33 @@
 import Foundation
 
-public struct Account: Codable, Identifiable {
+public struct Account: Codable, Identifiable, Hashable {
     public var id: UUID
 
-    // Optional legal name parts (for personal / entity accounts)
-    public var firstName: String?
-    public var middleName: String?
-    public var lastName: String?
+    // Optional legal name parts (for personal / entity accounts).
+    public var firstName: String
+    public var middleName: String
+    public var lastName: String
 
-    /// Required display name (e.g. "UBS Switzerland", "My Cold Wallet")
+    /// Required display name (e.g. "Mr. & Mrs. Smith's Wallet", "Taproot LLC").
     public var displayName: String
 
-    /// Optional type (bank, broker, crypto, vault, custom...)
-    public var type: String?
+    /// Optional type (e.g. "personal", "joint", "legal_entity", "trusts").
+    public var type: String
 
     public var assets: [Asset]
 
-    /// e.g. the unique id of "UBS", "Coinbase", "Home Safe"
-    public var institution: String
+    /// Institution metadata for this account (for example: id "hsbc", region "HK").
+    public var institution: Institution
 
     public init(
         id: UUID = UUID(),
-        firstName: String? = nil,
-        middleName: String? = nil,
-        lastName: String? = nil,
-        displayName: String,
-        type: String? = nil,
-        assets: [Asset] = [],
-        institution: String
+        displayName: String = "Anonymous",
+        assets: [Asset],
+        firstName: String = "",
+        middleName: String = "",
+        lastName: String = "",
+        type: String = "personal",
+        institution: Institution = .default
     ) {
         self.id = id
 
@@ -42,5 +42,12 @@ public struct Account: Codable, Identifiable {
         self.assets = assets
 
         self.institution = institution
+    }
+}
+
+public extension Account {
+    /// Returns provider-enriched institution metadata when available.
+    func resolvedInstitution(from provider: InstitutionProvider) -> Institution {
+        provider.institution(id: institution.id, regionCode: institution.regionCode) ?? institution
     }
 }
