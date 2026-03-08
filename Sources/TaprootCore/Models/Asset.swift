@@ -3,7 +3,7 @@ import Foundation
 public struct Asset: Codable, Identifiable, Hashable {
     public var id: UUID
 
-    /// Logical asset category key (for example: "cash", "equities", "cryptocurrencies").
+    /// Logical asset category key (for example: "cash", "securities", "crypto").
     public var type: String
 
     // Total value stored as a fixed-point integer.
@@ -69,121 +69,105 @@ public extension Asset {
     }
 }
 
-/// Using a two-tier structure (Group > Type)
-public enum AssetType: String, CaseIterable, Identifiable, Hashable {
-    // Core / High Frequency
-    case bankAccount
-    case cash
-    case equities
-    case etfsMutualFunds
-    case realEstate
-    case cryptocurrencies
+/// Simplified display groups for common personal finance flows.
+public enum AssetTypeDisplayGroup: String, CaseIterable, Identifiable {
+    case liquid = "Liquid"
+    case market = "Market"
+    case tangible = "Tangible"
 
-    // Extended / Specialized
-    case fixedIncome
-    case derivatives
+    public var id: String { rawValue }
+}
+
+/// Core asset taxonomy optimized for app UX and future extension.
+public enum AssetType: String, CaseIterable, Identifiable, Hashable {
+    // Liquid
+    case cash
+    case bankAccount
+
+    // Market
+    case securities
+    case crypto
+
+    // Tangible
+    case realEstate
     case commodities
     case collectibles
-    case vehicles
-    case privateEquity
-    case intellectualProperty
+
+    // Catch-all
     case other
 
-    public var id: String {
-        rawValue
+    public var id: String { rawValue }
+
+    public var displayGroup: AssetTypeDisplayGroup {
+        switch self {
+        case .cash, .bankAccount:
+            return .liquid
+        case .securities, .crypto:
+            return .market
+        case .realEstate, .commodities, .collectibles, .other:
+            return .tangible
+        }
     }
 
     public var displayName: String {
         switch self {
-        case .bankAccount: return "Bank & Savings"
-        case .cash: return "Physical Cash"
-        case .equities: return "Stocks"
-        case .etfsMutualFunds: return "ETFs & Funds"
+        case .cash: return "Cash"
+        case .bankAccount: return "Banking"
+        case .securities: return "Securities"
+        case .crypto: return "Crypto"
         case .realEstate: return "Property"
-        case .cryptocurrencies: return "Crypto"
-        case .fixedIncome: return "Bonds"
-        case .derivatives: return "Options/Futures"
-        case .commodities: return "Gold & Metals"
+        case .commodities: return "Commodities"
         case .collectibles: return "Collectibles"
-        case .vehicles: return "Vehicles"
-        case .privateEquity: return "Private Equity"
-        case .intellectualProperty: return "IP & Royalties"
         case .other: return "Other"
         }
     }
 
-    public var displayGroup: AssetTypeDisplayGroup {
-        switch self {
-        case .bankAccount, .cash:
-            return .liquidity
-        case .equities, .etfsMutualFunds, .fixedIncome, .derivatives:
-            return .investments
-        case .realEstate, .vehicles, .commodities, .collectibles:
-            return .physical
-        case .cryptocurrencies:
-            return .digital
-        case .privateEquity, .intellectualProperty, .other:
-            return .businessAndOther
-        }
-    }
-
-    /// Short helper text for non-finance users.
+    /// Short helper text for faster asset classification in app UI.
     public var displayDescription: String {
         switch self {
-        case .bankAccount: return "Checking, savings, and digital wallets like Apple Cash, WeChat Pay or PayPal."
-        case .cash: return "Physical banknotes and coins in any currency."
-        case .equities: return "Shares of public companies and individual stocks."
-        case .etfsMutualFunds: return "Diversified funds, index trackers, and mutual funds."
+        case .cash: return "Physical cash and petty cash balances."
+        case .bankAccount: return "Checking, savings, money market, and wallet balances."
+        case .securities: return "Stocks, ETFs, funds, bonds, and similar market instruments."
+        case .crypto: return "Coins, tokens, and on-chain assets including future digital instruments."
         case .realEstate: return "Residential, commercial property, or land."
-        case .cryptocurrencies: return "Bitcoin, Ethereum, and other blockchain-based coins."
-        case .fixedIncome: return "Government or corporate bonds and treasury bills."
-        case .derivatives: return "Financial contracts like options, futures, and warrants."
-        case .commodities: return "Physical assets like Gold, Silver, or Oil."
-        case .collectibles: return "Art, luxury watches, jewelry, and rare items."
-        case .vehicles: return "Cars, motorcycles, boats, or aircraft."
-        case .privateEquity: return "Shares in private companies or startups."
-        case .intellectualProperty: return "Patents, trademarks, and royalty-generating rights."
-        case .other: return "Any other assets that don't fit standard categories."
+        case .commodities: return "Gold, metals, energy products, and commodity-like holdings."
+        case .collectibles: return "Vehicles, art, watches, and other collectible physical items."
+        case .other: return "Any asset that does not fit the predefined categories."
         }
-    }
-}
-
-public enum AssetTypeDisplayGroup: String, CaseIterable, Identifiable {
-    case liquidity = "Cash & Banking"
-    case investments = "Market Investments"
-    case physical = "Physical Assets"
-    case digital = "Digital Assets"
-    case businessAndOther = "Business & Others"
-
-    public var id: String {
-        rawValue
     }
 }
 
 public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable {
-    /// Base Units
-    case unit = "Unit" // Cash, Deposits
-    case share = "Share" // Stocks, ETFs
-    case token = "Token" // Crypto, Web3
+    // Core counting
+    case unit = "Unit"
+    case share = "Share"
+    case token = "Token"
 
-    /// Physical & Weight
-    case gram = "Gram (g)" // 1,000 of a base unit.
-    case kilogram = "Kilogram (kg)"
-    case troyOunce = "Troy Ounce (ozt)"
-    case tael = "Tael" // For HK/Asia Gold
+    // Measurements
+    case gram = "Gram (g)"
+    case sqMeter = "Sq. Meter"
 
-    // Count & Area
-    case item = "Item" // Discrete physical count (for example, 3 watches).
-    case contract = "Contract" // Derivatives such as options/futures.
-    case squareMeter = "Sq. Meter" // Real Estate
-
-    /// Percentages
-    case ownershipPercent = "% Ownership" // Private Equity
-
-    /// Other
+    // Special
+    case percent = "%"
     case other = "Other"
 
-    public var id: String {
-        rawValue
+    public var id: String { rawValue }
+
+    /// UI hint for default quantity precision by unit.
+    public var defaultScale: Int {
+        switch self {
+        case .unit, .share:
+            return 0
+        case .token:
+            return 8
+        case .gram:
+            return 2
+        case .sqMeter:
+            return 1
+        case .percent:
+            return 2
+        case .other:
+            return 0
+        }
     }
 }

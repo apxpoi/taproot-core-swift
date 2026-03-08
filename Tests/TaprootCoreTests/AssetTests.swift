@@ -119,6 +119,17 @@ final class AssetTests: XCTestCase {
         )
     }
 
+    func testAssetTypeDisplayGroupMapping() {
+        XCTAssertEqual(AssetType.cash.displayGroup, .liquid)
+        XCTAssertEqual(AssetType.bankAccount.displayGroup, .liquid)
+        XCTAssertEqual(AssetType.securities.displayGroup, .market)
+        XCTAssertEqual(AssetType.crypto.displayGroup, .market)
+        XCTAssertEqual(AssetType.realEstate.displayGroup, .tangible)
+        XCTAssertEqual(AssetType.commodities.displayGroup, .tangible)
+        XCTAssertEqual(AssetType.collectibles.displayGroup, .tangible)
+        XCTAssertEqual(AssetType.other.displayGroup, .tangible)
+    }
+
     func testAssetUnitTypeMetadataIsComplete() {
         for unitType in AssetUnitType.allCases {
             XCTAssertFalse(unitType.rawValue.isEmpty)
@@ -139,5 +150,15 @@ final class AssetTests: XCTestCase {
             let decoded = try JSONDecoder().decode(AssetUnitType.self, from: data)
             XCTAssertEqual(decoded, unitType)
         }
+    }
+
+    func testAssetUnitTypeDefaultScaleRecommendations() {
+        XCTAssertEqual(AssetUnitType.unit.defaultScale, 0)
+        XCTAssertEqual(AssetUnitType.share.defaultScale, 0)
+        XCTAssertEqual(AssetUnitType.token.defaultScale, 8)
+        XCTAssertEqual(AssetUnitType.gram.defaultScale, 2)
+        XCTAssertEqual(AssetUnitType.sqMeter.defaultScale, 1)
+        XCTAssertEqual(AssetUnitType.percent.defaultScale, 2)
+        XCTAssertEqual(AssetUnitType.other.defaultScale, 0)
     }
 }

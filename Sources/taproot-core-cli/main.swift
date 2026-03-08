@@ -14,18 +14,18 @@ struct swift_executable {
         }
 
         let spacexAi = Asset(
-            type: AssetType.equities.id,
+            type: AssetType.securities.id,
             value: 53_750_000_000_000, // $537.5B with scale 2
             currency: Iso3166.USD.alphabeticCode,
             currencyScale: 2,
             quantity: 43_000_000, // 43.000000% stake with scale 6
             quantityScale: 6,
-            unitType: AssetUnitType.ownershipPercent.id,
+            unitType: AssetUnitType.percent.id,
             symbol: "SPACEX-XAI"
         )
 
         let tesla = Asset(
-            type: AssetType.equities.id,
+            type: AssetType.securities.id,
             value: 17_800_000_000_000, // $178B
             currency: Iso3166.USD.alphabeticCode,
             currencyScale: 2,
@@ -50,9 +50,9 @@ struct swift_executable {
             value: 4_755_700,
             currency: Iso3166.HKD.alphabeticCode,
             currencyScale: 2,
-            quantity: 1, // 1 tael is approx. 37.43g to 37.5g
-            quantityScale: 0,
-            unitType: AssetUnitType.tael.id
+            quantity: 3_750, // 37.50 grams with scale 2
+            quantityScale: 2,
+            unitType: AssetUnitType.gram.id
         )
 
         let vault = Vault(
