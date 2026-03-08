@@ -22,6 +22,23 @@ It is designed to be:
 - Portable
 - Long-term stable
 
+## 🧭 Scope
+
+Taproot Core is the **audit layer**.
+It includes:
+
+- Vault format and encryption
+- Data models and validation
+- Deterministic snapshot building from explicit FX inputs
+
+Taproot product apps are the **experience layer**.
+They are not part of this repository:
+
+- UI/UX and chart rendering
+- Market/FX data connectors and symbol mapping
+- Sync, account systems, and cloud services
+- Insight engines, alerts, and commercial workflows
+
 [![CI](https://github.com/apxpoi/taproot-core-swift/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/ci.yml) [![Security Scan](https://github.com/apxpoi/taproot-core-swift/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/security.yml) [![Dependabot Updates](https://github.com/apxpoi/taproot-core-swift/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=master)](https://github.com/apxpoi/taproot-core-swift/actions/workflows/dependabot/dependabot-updates)
 
 Build requirement:
@@ -125,6 +142,31 @@ Taproot Core exists to:
 - Enable independent verification
 - Serve as the foundation of Taproot
 
+## 🚫 Non-Goals
+
+This repository does not implement:
+
+- Automated analytics or recommendations
+- Data acquisition from exchanges, banks, or APIs
+- Subscription, billing, or growth features
+
+## 🔁 Determinism Contract
+
+Given the same vault data, snapshot timestamp, and FX rate table,
+`Vault.buildSnapshot(...)` must produce the same snapshot output.
+No hidden network state is used.
+
+## 🔧 Versioning & Breaking Changes
+
+- Schema-level changes may be breaking across major evolution points.
+- Breaking changes are documented in `CHANGELOG.md`.
+- Consumers should pin versions and run full validation on upgrades.
+
+## ™️ Trademark
+
+Code use is governed by `LICENSE`.
+Brand use is separate: do not use Taproot names, marks, or logos in a way that implies official affiliation.
+
 ## ❗ Non-Commercial License
 
 This project is source-available (MIT + Commons Clause).
@@ -146,6 +188,8 @@ You may NOT:
 - Build a competing commercial product using this code
 
 See LICENSE for details.
+
+For commercial licensing or partnership, contact the repository maintainers directly.
 
 ## ⚠️ Disclaimer
 
