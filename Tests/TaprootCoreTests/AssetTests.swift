@@ -103,6 +103,63 @@ final class AssetTests: XCTestCase {
         }
     }
 
+    func testValidateRejectsMarketAssetWithoutValuationTimestamp() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.securities.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: AssetUnitType.share.id,
+            symbol: "AAPL"
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.missingValuationTimestampForMarketAsset = error else {
+                return XCTFail("Expected missingValuationTimestampForMarketAsset, got: \(error)")
+            }
+        }
+    }
+
+    func testValidateAcceptsMarketAssetWithValuationTimestamp() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.crypto.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: AssetUnitType.token.id,
+            symbol: "BTC",
+            valuationAtUnixMs: 1_772_064_000_000
+        )
+
+        XCTAssertNoThrow(try asset.validate())
+    }
+
+    func testValidateRejectsNonPositiveValuationTimestamp() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.cash.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: AssetUnitType.unit.id,
+            valuationAtUnixMs: 0
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.invalidValuationTimestamp = error else {
+                return XCTFail("Expected invalidValuationTimestamp, got: \(error)")
+            }
+        }
+    }
+
     func testAssetTypeDisplayMetadataIsComplete() {
         for assetType in AssetType.allCases {
             XCTAssertFalse(assetType.displayName.isEmpty)

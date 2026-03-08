@@ -9,6 +9,8 @@ It provides:
 - AES-GCM authenticated encryption
 - Portable binary vault structure
 - Codable financial data models
+- Snapshot and cash-flow primitives for offline trend analysis (including per-snapshot FX rate tables)
+- Deterministic snapshot builder API with explicit FX conversion inputs
 
 Taproot Core contains **no UI**, **no analytics**, and **no network calls**.
 

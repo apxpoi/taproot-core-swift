@@ -12,6 +12,10 @@ struct swift_executable {
             fputs("Invalid demo snapshot date.\n", stderr)
             return
         }
+        let snapshotUnixMs = Int64(snapshotDate.timeIntervalSince1970 * 1_000)
+
+        let botAccountID = UUID()
+        let teamAccountID = UUID()
 
         let spacexAi = Asset(
             type: AssetType.securities.id,
@@ -21,7 +25,8 @@ struct swift_executable {
             quantity: 43_000_000, // 43.000000% stake with scale 6
             quantityScale: 6,
             unitType: AssetUnitType.percent.id,
-            symbol: "SPACEX-XAI"
+            symbol: "SPACEX-XAI",
+            valuationAtUnixMs: snapshotUnixMs
         )
 
         let tesla = Asset(
@@ -32,7 +37,8 @@ struct swift_executable {
             quantity: 507_500_000_000_000, // 507.5M shares with scale 6
             quantityScale: 6,
             unitType: AssetUnitType.share.id,
-            symbol: "TSLA"
+            symbol: "TSLA",
+            valuationAtUnixMs: snapshotUnixMs
         )
 
         let cash = Asset(
@@ -55,34 +61,73 @@ struct swift_executable {
             unitType: AssetUnitType.gram.id
         )
 
-        let vault = Vault(
+        let openingFunding = CashFlowEvent(
+            occurredAtUnixMs: snapshotUnixMs - 7 * 24 * 60 * 60 * 1_000,
+            type: .contribution,
+            amount: 50_000_000_000,
+            currency: Iso3166.USD.alphabeticCode,
+            currencyScale: 2,
+            accountID: botAccountID,
+            note: "Initial funding"
+        )
+
+        let accounts = [
+            Account(
+                id: botAccountID,
+                displayName: "Taproot Bot Wall-E",
+                assets: [
+                    spacexAi,
+                    tesla,
+                    cash,
+                ],
+                institution: Institution(
+                    id: "dark_hole",
+                    regionCode: "US",
+                    displayName: "Dark Hole Private Bank",
+                    category: .bank
+                )
+            ),
+
+            Account(
+                id: teamAccountID,
+                displayName: "Taproot Team",
+                assets: [
+                    gold,
+                ],
+                institution: Institution.default
+            ),
+        ]
+
+        let draftVault = Vault(
             version: 1,
             createdAt: snapshotDate,
             baseCurrency: Iso3166.USD.alphabeticCode,
-            accounts: [
-                Account(
-                    displayName: "Taproot Bot Wall-E",
-                    assets: [
-                        spacexAi,
-                        tesla,
-                        cash,
-                    ],
-                    institution: Institution(
-                        id: "dark_hole",
-                        regionCode: "US",
-                        displayName: "Dark Hole Private Bank",
-                        category: .bank
-                    )
-                ),
+            accounts: accounts,
+            cashFlows: [openingFunding]
+        )
 
-                Account(
-                    displayName: "Taproot Team",
-                    assets: [
-                        gold,
-                    ],
-                    institution: Institution.default
+        let monthlySnapshot = try draftVault.buildSnapshot(
+            capturedAtUnixMs: snapshotUnixMs,
+            totalValueScale: 2,
+            fxRates: [
+                SnapshotFXRate(
+                    fromCurrency: Iso3166.HKD.alphabeticCode,
+                    toCurrency: Iso3166.USD.alphabeticCode,
+                    rate: 1_280_000,
+                    rateScale: 7,
+                    quotedAtUnixMs: snapshotUnixMs
                 ),
-            ]
+            ],
+            note: "Month-end close"
+        )
+
+        let vault = Vault(
+            version: draftVault.version,
+            createdAt: draftVault.createdAt,
+            baseCurrency: draftVault.baseCurrency,
+            accounts: draftVault.accounts,
+            snapshots: [monthlySnapshot],
+            cashFlows: draftVault.cashFlows
         )
 
         for account in vault.accounts {

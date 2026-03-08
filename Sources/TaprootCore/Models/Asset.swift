@@ -24,6 +24,10 @@ public struct Asset: Codable, Identifiable, Hashable {
     /// Human-readable symbol for the asset (e.g. "QQQ", "AAPL").
     public var symbol: String
 
+    /// Last valuation timestamp in Unix milliseconds.
+    /// Required for market assets (for example: securities, crypto).
+    public var valuationAtUnixMs: Int64?
+
     public var note: String
 
     public init(
@@ -36,6 +40,7 @@ public struct Asset: Codable, Identifiable, Hashable {
         quantityScale: Int = 0,
         unitType: String = "",
         symbol: String = "",
+        valuationAtUnixMs: Int64? = nil,
         note: String = ""
     ) {
         self.id = id
@@ -52,6 +57,8 @@ public struct Asset: Codable, Identifiable, Hashable {
         self.unitType = unitType
 
         self.symbol = symbol
+
+        self.valuationAtUnixMs = valuationAtUnixMs
 
         self.note = note
     }
@@ -70,7 +77,7 @@ public extension Asset {
 }
 
 /// Simplified display groups for common personal finance flows.
-public enum AssetTypeDisplayGroup: String, CaseIterable, Identifiable {
+public enum AssetTypeDisplayGroup: String, Codable, CaseIterable, Identifiable {
     case liquid = "Liquid"
     case market = "Market"
     case tangible = "Tangible"
@@ -107,6 +114,10 @@ public enum AssetType: String, CaseIterable, Identifiable, Hashable {
         case .realEstate, .commodities, .collectibles, .other:
             return .tangible
         }
+    }
+
+    public var requiresValuationTimestamp: Bool {
+        displayGroup == .market
     }
 
     public var displayName: String {
