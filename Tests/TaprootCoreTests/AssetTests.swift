@@ -190,13 +190,14 @@ final class AssetTests: XCTestCase {
         XCTAssertEqual(AssetType.realEstate.displayGroup, .tangible)
         XCTAssertEqual(AssetType.commodities.displayGroup, .tangible)
         XCTAssertEqual(AssetType.collectibles.displayGroup, .tangible)
-        XCTAssertEqual(AssetType.other.displayGroup, .tangible)
+        XCTAssertEqual(AssetType.other.displayGroup, .other)
     }
 
     func testAssetTypeDisplayGroupUsesCaseNameAsID() {
         XCTAssertEqual(AssetTypeDisplayGroup.liquid.id, "liquid")
         XCTAssertEqual(AssetTypeDisplayGroup.market.id, "market")
         XCTAssertEqual(AssetTypeDisplayGroup.tangible.id, "tangible")
+        XCTAssertEqual(AssetTypeDisplayGroup.other.id, "other")
 
         for displayGroup in AssetTypeDisplayGroup.allCases {
             XCTAssertEqual(displayGroup.id, String(describing: displayGroup))
@@ -234,6 +235,64 @@ final class AssetTests: XCTestCase {
             XCTAssertEqual(unitType.id, expectedID)
             XCTAssertEqual(unitType.id, String(describing: unitType))
             XCTAssertNotEqual(unitType.id, unitType.rawValue)
+        }
+    }
+
+    func testAssetUnitTypeDisplayMetadataIsComplete() {
+        for unitType in AssetUnitType.allCases {
+            XCTAssertFalse(unitType.displayName.isEmpty)
+            XCTAssertFalse(unitType.displayDescription.isEmpty)
+            XCTAssertFalse(unitType.displayGroup.rawValue.isEmpty)
+            XCTAssertEqual(unitType.displayName, unitType.rawValue)
+        }
+    }
+
+    func testAssetUnitTypeDisplayGroupMapping() {
+        XCTAssertEqual(AssetUnitType.unit.displayGroup, .liquid)
+        XCTAssertEqual(AssetUnitType.share.displayGroup, .market)
+        XCTAssertEqual(AssetUnitType.token.displayGroup, .market)
+        XCTAssertEqual(AssetUnitType.gram.displayGroup, .tangible)
+        XCTAssertEqual(AssetUnitType.sqMeter.displayGroup, .tangible)
+        XCTAssertEqual(AssetUnitType.percent.displayGroup, .market)
+        XCTAssertEqual(AssetUnitType.other.displayGroup, .other)
+    }
+
+    func testAssetUnitTypeDisplayGroupUsesCaseNameAsID() {
+        XCTAssertEqual(AssetUnitType.unit.displayGroup.id, "liquid")
+        XCTAssertEqual(AssetUnitType.share.displayGroup.id, "market")
+        XCTAssertEqual(AssetUnitType.gram.displayGroup.id, "tangible")
+        XCTAssertEqual(AssetUnitType.other.displayGroup.id, "other")
+
+        for displayGroup in AssetTypeDisplayGroup.allCases {
+            XCTAssertEqual(displayGroup.id, String(describing: displayGroup))
+        }
+    }
+
+    func testAssetUnitTypeDisplayNamesAreStable() {
+        XCTAssertEqual(AssetUnitType.unit.displayName, "Unit")
+        XCTAssertEqual(AssetUnitType.share.displayName, "Share")
+        XCTAssertEqual(AssetUnitType.token.displayName, "Token")
+        XCTAssertEqual(AssetUnitType.gram.displayName, "Gram (g)")
+        XCTAssertEqual(AssetUnitType.sqMeter.displayName, "Sq. Meter")
+        XCTAssertEqual(AssetUnitType.percent.displayName, "Percent (%)")
+        XCTAssertEqual(AssetUnitType.other.displayName, "Other")
+    }
+
+    func testAssetUnitTypeDisplayDescriptionsAreSpecific() {
+        XCTAssertTrue(AssetUnitType.unit.displayDescription.contains("counted one by one"))
+        XCTAssertTrue(AssetUnitType.share.displayDescription.contains("stocks or funds"))
+        XCTAssertTrue(AssetUnitType.token.displayDescription.contains("digital assets"))
+        XCTAssertTrue(AssetUnitType.gram.displayDescription.contains("grams"))
+        XCTAssertTrue(AssetUnitType.sqMeter.displayDescription.contains("square meters"))
+        XCTAssertTrue(AssetUnitType.percent.displayDescription.contains("Ownership percentage"))
+        XCTAssertTrue(AssetUnitType.other.displayDescription.contains("none of the above fits"))
+    }
+
+    func testAssetUnitTypeDisplayGroupCodableRoundTrip() throws {
+        for displayGroup in AssetTypeDisplayGroup.allCases {
+            let data = try JSONEncoder().encode(displayGroup)
+            let decoded = try JSONDecoder().decode(AssetTypeDisplayGroup.self, from: data)
+            XCTAssertEqual(decoded, displayGroup)
         }
     }
 

@@ -5,6 +5,7 @@ public enum AssetTypeDisplayGroup: String, Codable, CaseIterable, Identifiable {
   case liquid = "Liquid"
   case market = "Market"
   case tangible = "Tangible"
+  case other = "Other"
 
   public var id: String {
     return String(describing: self)
@@ -39,8 +40,10 @@ public enum AssetType: String, CaseIterable, Identifiable, Hashable {
       return .liquid
     case .securities, .crypto:
       return .market
-    case .realEstate, .commodities, .collectibles, .other:
+    case .realEstate, .commodities, .collectibles:
       return .tangible
+    case .other:
+      return .other
     }
   }
 
