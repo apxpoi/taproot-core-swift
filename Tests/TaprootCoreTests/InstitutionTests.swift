@@ -114,6 +114,23 @@ final class InstitutionTests: XCTestCase {
         }
     }
 
+    func testInstitutionCategoryIDsUseCaseNames() {
+        let expectedIDs: [InstitutionCategory: String] = [
+            .bank: "bank",
+            .brokerage: "brokerage",
+            .cryptoExchange: "cryptoExchange",
+            .paymentProvider: "paymentProvider",
+            .wallet: "wallet",
+            .other: "other",
+        ]
+
+        for (category, expectedID) in expectedIDs {
+            XCTAssertEqual(category.id, expectedID)
+            XCTAssertEqual(category.id, String(describing: category))
+            XCTAssertEqual(InstitutionCategory(rawValue: category.id), category)
+        }
+    }
+
     func testInstitutionCategoryExamplesAreClearForCommonProviders() {
         XCTAssertTrue(InstitutionCategory.bank.displayDescription.contains("Licensed banks"))
         XCTAssertTrue(InstitutionCategory.paymentProvider.displayDescription.contains("Apple Pay"))

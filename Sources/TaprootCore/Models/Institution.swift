@@ -90,7 +90,7 @@ public enum InstitutionCategory: String, Codable, CaseIterable, Identifiable, Ha
     case other
 
     public var id: String {
-        rawValue
+        return String(describing: self)
     }
 
     public var displayName: String {

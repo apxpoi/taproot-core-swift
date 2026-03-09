@@ -165,7 +165,7 @@ final class AssetTests: XCTestCase {
             XCTAssertFalse(assetType.displayName.isEmpty)
             XCTAssertFalse(assetType.displayDescription.isEmpty)
             XCTAssertFalse(assetType.displayGroup.rawValue.isEmpty)
-            XCTAssertEqual(assetType.id, assetType.rawValue)
+            XCTAssertEqual(assetType.id, String(describing: assetType))
         }
     }
 
@@ -174,6 +174,12 @@ final class AssetTests: XCTestCase {
             Set(AssetType.allCases.map(\.rawValue)).count,
             AssetType.allCases.count
         )
+    }
+
+    func testAssetTypeIDsRoundTripThroughRawValueLookup() {
+        for assetType in AssetType.allCases {
+            XCTAssertEqual(AssetType(rawValue: assetType.id), assetType)
+        }
     }
 
     func testAssetTypeDisplayGroupMapping() {
@@ -187,10 +193,22 @@ final class AssetTests: XCTestCase {
         XCTAssertEqual(AssetType.other.displayGroup, .tangible)
     }
 
+    func testAssetTypeDisplayGroupUsesCaseNameAsID() {
+        XCTAssertEqual(AssetTypeDisplayGroup.liquid.id, "liquid")
+        XCTAssertEqual(AssetTypeDisplayGroup.market.id, "market")
+        XCTAssertEqual(AssetTypeDisplayGroup.tangible.id, "tangible")
+
+        for displayGroup in AssetTypeDisplayGroup.allCases {
+            XCTAssertEqual(displayGroup.id, String(describing: displayGroup))
+        }
+
+        XCTAssertNotEqual(AssetTypeDisplayGroup.liquid.id, AssetTypeDisplayGroup.liquid.rawValue)
+    }
+
     func testAssetUnitTypeMetadataIsComplete() {
         for unitType in AssetUnitType.allCases {
             XCTAssertFalse(unitType.rawValue.isEmpty)
-            XCTAssertEqual(unitType.id, unitType.rawValue)
+            XCTAssertEqual(unitType.id, String(describing: unitType))
         }
     }
 
@@ -199,6 +217,24 @@ final class AssetTests: XCTestCase {
             Set(AssetUnitType.allCases.map(\.rawValue)).count,
             AssetUnitType.allCases.count
         )
+    }
+
+    func testAssetUnitTypeIDsUseCaseNamesInsteadOfDisplayLabels() {
+        let expectedIDs: [AssetUnitType: String] = [
+            .unit: "unit",
+            .share: "share",
+            .token: "token",
+            .gram: "gram",
+            .sqMeter: "sqMeter",
+            .percent: "percent",
+            .other: "other",
+        ]
+
+        for (unitType, expectedID) in expectedIDs {
+            XCTAssertEqual(unitType.id, expectedID)
+            XCTAssertEqual(unitType.id, String(describing: unitType))
+            XCTAssertNotEqual(unitType.id, unitType.rawValue)
+        }
     }
 
     func testAssetUnitTypeCodableRoundTrip() throws {
