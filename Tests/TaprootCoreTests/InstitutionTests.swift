@@ -2,7 +2,7 @@
 import XCTest
 
 final class InstitutionTests: XCTestCase {
-    func testInitializerNormalizesFields() {
+    func testInitializerNormalizesIDAndRegionAndPreservesDisplayFields() {
         let institution = Institution(
             id: "  hsbc  ",
             regionCode: " hk ",
@@ -13,8 +13,8 @@ final class InstitutionTests: XCTestCase {
 
         XCTAssertEqual(institution.id, "hsbc")
         XCTAssertEqual(institution.regionCode, "HK")
-        XCTAssertEqual(institution.displayName, "HSBC Hong Kong")
-        XCTAssertEqual(institution.description, "Retail and private banking")
+        XCTAssertEqual(institution.displayName, " HSBC Hong Kong ")
+        XCTAssertEqual(institution.description, "  Retail and private banking  ")
         XCTAssertEqual(institution.category, .bank)
     }
 
@@ -27,7 +27,17 @@ final class InstitutionTests: XCTestCase {
 
         XCTAssertEqual(institution.id, Institution.default.id)
         XCTAssertEqual(institution.regionCode, Institution.default.regionCode)
-        XCTAssertEqual(institution.displayName, Institution.default.id)
+        XCTAssertEqual(institution.displayName, "  ")
+    }
+
+    func testInitializerUsesFallbackDisplayNameWhenDisplayNameIsTrulyEmpty() {
+        let institution = Institution(
+            id: "broker-001",
+            regionCode: "US",
+            displayName: ""
+        )
+
+        XCTAssertEqual(institution.displayName, "broker-001")
     }
 
     func testCanonicalIDIsNormalizedForLookup() {

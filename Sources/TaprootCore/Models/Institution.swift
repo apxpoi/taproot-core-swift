@@ -26,11 +26,12 @@ public struct Institution: Codable, Identifiable, Hashable, Sendable {
         let trimmedRegionCode = regionCode.trimmingCharacters(in: .whitespacesAndNewlines)
         self.regionCode = trimmedRegionCode.isEmpty ? Institution.default.regionCode : trimmedRegionCode.uppercased()
 
-        let trimmedDisplayName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.displayName = trimmedDisplayName.isEmpty ? self.id : trimmedDisplayName
-
-        let trimmedDescription = description?.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.description = (trimmedDescription?.isEmpty == true) ? nil : trimmedDescription
+        self.displayName = displayName.isEmpty ? self.id : displayName
+        if let description {
+            self.description = description.isEmpty ? nil : description
+        } else {
+            self.description = nil
+        }
 
         self.category = category
     }
