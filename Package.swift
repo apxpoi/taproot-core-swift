@@ -12,8 +12,12 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .executable(
-            name: "taproot-core-cli",
-            targets: ["taproot-core-cli"]
+            name: "taproot-core-swift",
+            targets: ["taproot-core-swift"]
+        ),
+        .executable(
+            name: "taproot-core-swift-demo",
+            targets: ["taproot-core-swift-demo"]
         ),
         .library(
             name: "TaprootCore",
@@ -28,7 +32,13 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .executableTarget(
-            name: "taproot-core-cli",
+            name: "taproot-core-swift",
+            dependencies: [
+                "TaprootCore",
+            ]
+        ),
+        .executableTarget(
+            name: "taproot-core-swift-demo",
             dependencies: [
                 "TaprootCore",
             ]
@@ -46,6 +56,7 @@ let package = Package(
             name: "TaprootCoreTests",
             dependencies: [
                 "TaprootCore",
+                "taproot-core-swift",
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Iso3166", package: "iso3166-swift"),
             ]

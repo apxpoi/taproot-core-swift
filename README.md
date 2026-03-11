@@ -62,10 +62,21 @@ swift build
 swift test
 ```
 
+Decrypt a `.tdf` vault file:
+
+```bash
+swift run taproot-core-swift -- [-a <password>] [-d <outputFolder>] <path/to/.tdfFile>
+```
+
+Notes:
+
+- If `-d` is omitted, output is written to the same folder as the input `.tdf` file.
+- Passing passwords with `-a` is supported but less secure (process list / shell history exposure).
+
 Run the demo CLI target:
 
 ```bash
-swift run taproot-core-cli
+swift run taproot-core-swift-demo
 ```
 
 ## 📏 System Limits
