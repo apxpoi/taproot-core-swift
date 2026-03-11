@@ -33,6 +33,46 @@
       "target": "taproot-core-cli",
       "configuration": "release",
       "preLaunchTask": "swift: Build Release taproot-core-cli"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Debug taproot-core-swift",
+      "target": "taproot-core-swift",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug taproot-core-swift"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Release taproot-core-swift",
+      "target": "taproot-core-swift",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release taproot-core-swift"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Debug taproot-core-swift-demo",
+      "target": "taproot-core-swift-demo",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug taproot-core-swift-demo"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:taproot-core-swift}",
+      "name": "Release taproot-core-swift-demo",
+      "target": "taproot-core-swift-demo",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release taproot-core-swift-demo"
     }
   ]
 }
