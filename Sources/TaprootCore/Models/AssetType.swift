@@ -12,7 +12,7 @@ public enum AssetTypeDisplayGroup: String, Codable, CaseIterable, Identifiable {
   }
 }
 
-/// Core asset taxonomy optimized for app UX and future extension.
+/// Core asset taxonomy used for validation, grouping, and future extension.
 public enum AssetType: String, CaseIterable, Identifiable, Hashable {
   // Liquid
   case cash
@@ -49,6 +49,55 @@ public enum AssetType: String, CaseIterable, Identifiable, Hashable {
 
   public var requiresValuationTimestamp: Bool {
     displayGroup == .market
+  }
+
+  public var defaultUnitType: AssetUnitType {
+    switch self {
+    case .cash, .bankAccount, .collectibles:
+      return .unit
+    case .securities:
+      return .share
+    case .crypto:
+      return .unit
+    case .realEstate:
+      return .sqMeter
+    case .commodities:
+      return .gram
+    case .other:
+      return .other
+    }
+  }
+
+  public var supportedUnitTypes: Set<AssetUnitType> {
+    switch self {
+    case .cash, .bankAccount:
+      return [.unit]
+    case .securities:
+      return [.share, .percent, .unit]
+    case .crypto:
+      return [.unit]
+    case .realEstate:
+      return [.unit, .percent, .ping, .sqFoot, .sqMeter, .acre, .hectare]
+    case .commodities:
+      return [.unit, .gram]
+    case .collectibles:
+      return [.unit]
+    case .other:
+      return Set(AssetUnitType.allCases)
+    }
+  }
+
+  public var supportsCustomUnitType: Bool {
+    switch self {
+    case .realEstate, .commodities, .collectibles, .other:
+      return true
+    case .cash, .bankAccount, .securities, .crypto:
+      return false
+    }
+  }
+
+  public func supports(unitType: AssetUnitType) -> Bool {
+    supportedUnitTypes.contains(unitType)
   }
 
   public var displayName: String {

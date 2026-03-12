@@ -11,6 +11,22 @@ final class AssetModelTests: XCTestCase {
         )
 
         XCTAssertEqual(asset.note, "")
+        XCTAssertEqual(asset.unitType, AssetUnitType.unit.id)
+        XCTAssertEqual(asset.normalizedUnitTypeID, AssetUnitType.unit.id)
+    }
+
+    func testTypedInitializerDefaultsUnitTypeFromAssetType() {
+        let asset = Asset(
+            type: .securities,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            symbol: "TAP",
+            valuationAtUnixMs: 1_772_064_000_000
+        )
+
+        XCTAssertEqual(asset.type, AssetType.securities.id)
+        XCTAssertEqual(asset.unitType, AssetType.securities.defaultUnitType.id)
     }
 
     func testCodableRoundTripPreservesNote() throws {
@@ -132,7 +148,7 @@ final class AssetModelTests: XCTestCase {
             currencyScale: 2,
             quantity: 1,
             quantityScale: 0,
-            unitType: AssetUnitType.token.id,
+            unitType: AssetUnitType.unit.id,
             symbol: "BTC",
             valuationAtUnixMs: 1_772_064_000_000
         )
@@ -157,6 +173,108 @@ final class AssetModelTests: XCTestCase {
             guard case AssetValidationError.invalidValuationTimestamp = error else {
                 return XCTFail("Expected invalidValuationTimestamp, got: \(error)")
             }
+        }
+    }
+
+    func testValidateAcceptsEmptyStoredUnitTypeForKnownAssetByUsingDefault() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.cash.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: "  "
+        )
+
+        XCTAssertEqual(asset.normalizedUnitTypeID, AssetType.cash.defaultUnitType.id)
+        XCTAssertEqual(asset.unitTypeDefinition, .unit)
+        XCTAssertNoThrow(try asset.validate())
+    }
+
+    func testValidateRejectsUnknownBuiltInUnitIdentifier() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.cash.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: "kilogram"
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.invalidUnitType(let unitType) = error else {
+                return XCTFail("Expected invalidUnitType, got: \(error)")
+            }
+
+            XCTAssertEqual(unitType, "kilogram")
+        }
+    }
+
+    func testValidateRejectsIncompatibleBuiltInUnitIdentifier() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.securities.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: AssetUnitType.gram.id,
+            symbol: "AAPL",
+            valuationAtUnixMs: 1_772_064_000_000
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.incompatibleUnitType(let assetType, let unitType) = error else {
+                return XCTFail("Expected incompatibleUnitType, got: \(error)")
+            }
+
+            XCTAssertEqual(assetType, AssetType.securities.id)
+            XCTAssertEqual(unitType, AssetUnitType.gram.id)
+        }
+    }
+
+    func testValidateAcceptsCustomUnitForCompatibleAssetType() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.realEstate.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 2,
+            quantityScale: 0,
+            unitType: AssetUnitType.customIdentifier(named: "rai")
+        )
+
+        XCTAssertTrue(asset.hasCustomUnitType)
+        XCTAssertNoThrow(try asset.validate())
+    }
+
+    func testValidateRejectsCustomUnitForIncompatibleAssetType() {
+        let asset = Asset(
+            id: UUID(),
+            type: AssetType.crypto.id,
+            value: 100,
+            currency: "USD",
+            currencyScale: 2,
+            quantity: 1,
+            quantityScale: 0,
+            unitType: AssetUnitType.customIdentifier(named: "lot"),
+            symbol: "BTC",
+            valuationAtUnixMs: 1_772_064_000_000
+        )
+
+        XCTAssertThrowsError(try asset.validate()) { error in
+            guard case AssetValidationError.incompatibleUnitType(let assetType, let unitType) = error else {
+                return XCTFail("Expected incompatibleUnitType, got: \(error)")
+            }
+
+            XCTAssertEqual(assetType, AssetType.crypto.id)
+            XCTAssertEqual(unitType, AssetUnitType.customIdentifier(named: "lot"))
         }
     }
 }

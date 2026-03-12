@@ -1,4 +1,3 @@
-import Iso3166
 @testable import TaprootCore
 import XCTest
 
@@ -6,7 +5,8 @@ final class AssetUnitTypeTests: XCTestCase {
     func testAssetUnitTypeMetadataIsComplete() {
         for unitType in AssetUnitType.allCases {
             XCTAssertFalse(unitType.rawValue.isEmpty)
-            XCTAssertEqual(unitType.id, String(describing: unitType))
+            XCTAssertEqual(unitType.id, unitType.rawValue)
+            XCTAssertEqual(AssetUnitType(id: unitType.id), unitType)
         }
     }
 
@@ -17,96 +17,34 @@ final class AssetUnitTypeTests: XCTestCase {
         )
     }
 
-    func testAssetUnitTypeIDsUseCaseNamesInsteadOfDisplayLabels() {
-        let expectedIDs: [AssetUnitType: String] = [
-            .unit: "unit",
-            .share: "share",
-            .token: "token",
-            .gram: "gram",
-            .ping: "ping",
-            .sqFoot: "sqFoot",
-            .sqMeter: "sqMeter",
-            .acre: "acre",
-            .hectare: "hectare",
-            .percent: "percent",
-            .other: "other",
-        ]
-
-        for (unitType, expectedID) in expectedIDs {
-            XCTAssertEqual(unitType.id, expectedID)
-            XCTAssertEqual(unitType.id, String(describing: unitType))
-            XCTAssertNotEqual(unitType.id, unitType.rawValue)
+    func testAssetUnitDimensionMetadataIsComplete() {
+        for dimension in AssetUnitDimension.allCases {
+            XCTAssertFalse(dimension.rawValue.isEmpty)
+            XCTAssertEqual(dimension.id, dimension.rawValue)
         }
     }
 
-    func testAssetUnitTypeDisplayMetadataIsComplete() {
-        for unitType in AssetUnitType.allCases {
-            XCTAssertFalse(unitType.displayName.isEmpty)
-            XCTAssertFalse(unitType.displayDescription.isEmpty)
-            XCTAssertFalse(unitType.displayGroup.rawValue.isEmpty)
-            XCTAssertEqual(unitType.displayName, unitType.rawValue)
-        }
+    func testAssetUnitTypeDimensionsAreStable() {
+        XCTAssertEqual(AssetUnitType.unit.dimension, .count)
+        XCTAssertEqual(AssetUnitType.share.dimension, .count)
+        XCTAssertEqual(AssetUnitType.gram.dimension, .mass)
+        XCTAssertEqual(AssetUnitType.ping.dimension, .area)
+        XCTAssertEqual(AssetUnitType.sqFoot.dimension, .area)
+        XCTAssertEqual(AssetUnitType.sqMeter.dimension, .area)
+        XCTAssertEqual(AssetUnitType.acre.dimension, .area)
+        XCTAssertEqual(AssetUnitType.hectare.dimension, .area)
+        XCTAssertEqual(AssetUnitType.percent.dimension, .ratio)
+        XCTAssertEqual(AssetUnitType.other.dimension, .other)
     }
 
-    func testAssetUnitTypeDisplayGroupMapping() {
-        XCTAssertEqual(AssetUnitType.unit.displayGroup, .liquid)
-        XCTAssertEqual(AssetUnitType.share.displayGroup, .market)
-        XCTAssertEqual(AssetUnitType.token.displayGroup, .market)
-        XCTAssertEqual(AssetUnitType.gram.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.ping.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.sqFoot.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.sqMeter.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.acre.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.hectare.displayGroup, .tangible)
-        XCTAssertEqual(AssetUnitType.percent.displayGroup, .market)
-        XCTAssertEqual(AssetUnitType.other.displayGroup, .other)
-    }
-
-    func testAssetUnitTypeDisplayGroupUsesCaseNameAsID() {
-        XCTAssertEqual(AssetUnitType.unit.displayGroup.id, "liquid")
-        XCTAssertEqual(AssetUnitType.share.displayGroup.id, "market")
-        XCTAssertEqual(AssetUnitType.gram.displayGroup.id, "tangible")
-        XCTAssertEqual(AssetUnitType.other.displayGroup.id, "other")
-
-        for displayGroup in AssetTypeDisplayGroup.allCases {
-            XCTAssertEqual(displayGroup.id, String(describing: displayGroup))
-        }
-    }
-
-    func testAssetUnitTypeDisplayNamesAreStable() {
-        XCTAssertEqual(AssetUnitType.unit.displayName, "Unit")
-        XCTAssertEqual(AssetUnitType.share.displayName, "Share")
-        XCTAssertEqual(AssetUnitType.token.displayName, "Token")
-        XCTAssertEqual(AssetUnitType.gram.displayName, "Gram (g)")
-        XCTAssertEqual(AssetUnitType.ping.displayName, "Ping (坪)")
-        XCTAssertEqual(AssetUnitType.sqFoot.displayName, "Sq. Foot")
-        XCTAssertEqual(AssetUnitType.sqMeter.displayName, "Sq. Meter")
-        XCTAssertEqual(AssetUnitType.acre.displayName, "Acre")
-        XCTAssertEqual(AssetUnitType.hectare.displayName, "Hectare")
-        XCTAssertEqual(AssetUnitType.percent.displayName, "Percent (%)")
-        XCTAssertEqual(AssetUnitType.other.displayName, "Other")
-    }
-
-    func testAssetUnitTypeDisplayDescriptionsAreSpecific() {
-        XCTAssertTrue(AssetUnitType.unit.displayDescription.contains("counted one by one"))
-        XCTAssertTrue(AssetUnitType.share.displayDescription.contains("stocks or funds"))
-        XCTAssertTrue(AssetUnitType.token.displayDescription.contains("digital assets"))
-        XCTAssertTrue(AssetUnitType.gram.displayDescription.contains("grams"))
-        XCTAssertTrue(AssetUnitType.ping.displayDescription.contains("ping (坪)"))
-        XCTAssertTrue(AssetUnitType.sqFoot.displayDescription.contains("square feet"))
-        XCTAssertTrue(AssetUnitType.sqMeter.displayDescription.contains("square meters"))
-        XCTAssertTrue(AssetUnitType.acre.displayDescription.contains("acres"))
-        XCTAssertTrue(AssetUnitType.hectare.displayDescription.contains("hectares"))
-        XCTAssertTrue(AssetUnitType.percent.displayDescription.contains("Ownership percentage"))
-        XCTAssertTrue(AssetUnitType.other.displayDescription.contains("none of the above fits"))
-    }
-
-    func testAssetUnitTypeDisplayGroupCodableRoundTrip() throws {
-        for displayGroup in AssetTypeDisplayGroup.allCases {
-            let data = try JSONEncoder().encode(displayGroup)
-            let decoded = try JSONDecoder().decode(AssetTypeDisplayGroup.self, from: data)
-            XCTAssertEqual(decoded, displayGroup)
-        }
+    func testAssetUnitTypeConvertibleMeasurementFlagMatchesDimension() {
+        XCTAssertFalse(AssetUnitType.unit.isConvertibleMeasurement)
+        XCTAssertFalse(AssetUnitType.share.isConvertibleMeasurement)
+        XCTAssertTrue(AssetUnitType.gram.isConvertibleMeasurement)
+        XCTAssertTrue(AssetUnitType.sqFoot.isConvertibleMeasurement)
+        XCTAssertTrue(AssetUnitType.sqMeter.isConvertibleMeasurement)
+        XCTAssertFalse(AssetUnitType.percent.isConvertibleMeasurement)
+        XCTAssertFalse(AssetUnitType.other.isConvertibleMeasurement)
     }
 
     func testAssetUnitTypeCodableRoundTrip() throws {
@@ -117,18 +55,12 @@ final class AssetUnitTypeTests: XCTestCase {
         }
     }
 
-    func testAssetUnitTypeDefaultScaleRecommendations() {
-        XCTAssertEqual(AssetUnitType.unit.defaultScale, 0)
-        XCTAssertEqual(AssetUnitType.share.defaultScale, 0)
-        XCTAssertEqual(AssetUnitType.token.defaultScale, 8)
-        XCTAssertEqual(AssetUnitType.gram.defaultScale, 2)
-        XCTAssertEqual(AssetUnitType.ping.defaultScale, 2)
-        XCTAssertEqual(AssetUnitType.sqFoot.defaultScale, 0)
-        XCTAssertEqual(AssetUnitType.sqMeter.defaultScale, 1)
-        XCTAssertEqual(AssetUnitType.acre.defaultScale, 3)
-        XCTAssertEqual(AssetUnitType.hectare.defaultScale, 3)
-        XCTAssertEqual(AssetUnitType.percent.defaultScale, 2)
-        XCTAssertEqual(AssetUnitType.other.defaultScale, 0)
+    func testAssetUnitDimensionCodableRoundTrip() throws {
+        for dimension in AssetUnitDimension.allCases {
+            let data = try JSONEncoder().encode(dimension)
+            let decoded = try JSONDecoder().decode(AssetUnitDimension.self, from: data)
+            XCTAssertEqual(decoded, dimension)
+        }
     }
 
     func testAssetUnitTypeMeasurementConversionMapIncludesMeasurementUnitsOnly() {
@@ -159,23 +91,11 @@ final class AssetUnitTypeTests: XCTestCase {
         XCTAssertNil(AssetUnitType.measurementConversionFactor(from: .unit, to: .sqMeter))
     }
 
-    func testAssetUnitTypeCommonRealEstateAreaUnitsByAlpha2Code() {
-        let expectedUnitsByAlpha2Code: [String: [AssetUnitType]] = [
-            HongKong.alpha2Code: [.sqFoot, .sqMeter],
-            Singapore.alpha2Code: [.sqFoot, .sqMeter],
-            UnitedArabEmirates.alpha2Code: [.sqFoot, .sqMeter],
-            Japan.alpha2Code: [.ping, .sqMeter],
-            Taiwan.alpha2Code: [.ping, .sqMeter],
-            Canada.alpha2Code: [.sqFoot, .sqMeter, .acre],
-            Australia.alpha2Code: [.sqMeter, .hectare, .acre],
-            UnitedKingdom.alpha2Code: [.sqFoot, .sqMeter, .acre, .hectare],
-            UnitedStates.alpha2Code: [.sqFoot, .acre],
-        ]
-
-        for (alpha2Code, expectedUnits) in expectedUnitsByAlpha2Code {
-            XCTAssertEqual(AssetUnitType.commonRealEstateAreaUnits(alpha2Code: alpha2Code), expectedUnits)
-        }
-
-        XCTAssertEqual(AssetUnitType.commonRealEstateAreaUnits(alpha2Code: "ZZ"), [.sqMeter])
+    func testCustomIdentifierHelpers() {
+        XCTAssertEqual(AssetUnitType.customIdentifier(named: "tola"), "custom:tola")
+        XCTAssertTrue(AssetUnitType.isCustomIdentifier("custom:tola"))
+        XCTAssertTrue(AssetUnitType.isCustomIdentifier(" CUSTOM:TOLA "))
+        XCTAssertFalse(AssetUnitType.isCustomIdentifier("custom:"))
+        XCTAssertFalse(AssetUnitType.isCustomIdentifier(AssetUnitType.unit.id))
     }
 }

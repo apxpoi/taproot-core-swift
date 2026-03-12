@@ -1,101 +1,55 @@
 import Foundation
-import Iso3166
 
 public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable {
-  // Core counting
-  case unit = "Unit"
-  case share = "Share"
-  case token = "Token"
+  case unit
+  case share
+  case gram
+  case ping
+  case sqFoot
+  case sqMeter
+  case acre
+  case hectare
+  case percent
+  case other
 
-  // Measurements
-  case gram = "Gram (g)"
-  case ping = "Ping (坪)"
-  case sqFoot = "Sq. Foot"
-  case sqMeter = "Sq. Meter"
-  case acre = "Acre"
-  case hectare = "Hectare"
+  public static let customIdentifierPrefix = "custom:"
 
-  // Special
-  case percent = "Percent (%)"
-  case other = "Other"
-
-  public var id: String {
-    return String(describing: self)
+  public init?(id: String) {
+    self.init(rawValue: id)
   }
 
-  public var displayName: String {
+  public var id: String {
     return rawValue
   }
 
-  public var displayGroup: AssetTypeDisplayGroup {
+  public var dimension: AssetUnitDimension {
     switch self {
-    case .unit:
-      return .liquid
-    case .share, .token, .percent:
-      return .market
-    case .gram, .ping, .sqFoot, .sqMeter, .acre, .hectare:
-      return .tangible
+    case .unit, .share:
+      return .count
+    case .gram:
+      return .mass
+    case .ping, .sqFoot, .sqMeter, .acre, .hectare:
+      return .area
+    case .percent:
+      return .ratio
     case .other:
       return .other
     }
   }
 
-  /// Short helper text for faster unit selection in app UI.
-  public var displayDescription: String {
-    switch self {
-    case .unit:
-      return "Generic whole-item quantities counted one by one."
-    case .share:
-      return "Shares in stocks or funds."
-    case .token:
-      return "Token units for digital assets."
-    case .gram:
-      return "Weight measured in grams."
-    case .ping:
-      return "Area measured in ping (坪)."
-    case .sqFoot:
-      return "Area measured in square feet (sq ft)."
-    case .sqMeter:
-      return "Area measured in square meters."
-    case .acre:
-      return "Land area measured in acres (ac)."
-    case .hectare:
-      return "Land area measured in hectares (ha)."
-    case .percent:
-      return "Ownership percentage value."
-    case .other:
-      return "Use when none of the above fits."
-    }
-  }
-
-  /// UI hint for default quantity precision by unit.
-  public var defaultScale: Int {
-    switch self {
-    case .unit, .share:
-      return 0
-    case .token:
-      return 8
-    case .gram:
-      return 2
-    case .ping:
-      return 2
-    case .sqFoot:
-      return 0
-    case .sqMeter:
-      return 1
-    case .acre, .hectare:
-      return 3
-    case .percent:
-      return 2
-    case .other:
-      return 0
+  public var isConvertibleMeasurement: Bool {
+    switch dimension {
+    case .mass, .area:
+      return true
+    case .count, .ratio, .other:
+      return false
     }
   }
 
   /// Built-in multipliers to convert measurement quantities between units.
   /// Formula: `valueInTarget = valueInSource * factor`.
   public static var measurementConversionMap: [AssetUnitType: [AssetUnitType: Decimal]] {
-    let weightUnitBaseFactors: [AssetUnitType: Decimal] = [
+    let massUnitBaseFactors: [AssetUnitType: Decimal] = [
       .gram: 1,
     ]
 
@@ -108,7 +62,7 @@ public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable
     ]
 
     var conversionMap: [AssetUnitType: [AssetUnitType: Decimal]] = [:]
-    conversionMap.merge(buildMeasurementConversionMap(from: weightUnitBaseFactors), uniquingKeysWith: { _, new in new })
+    conversionMap.merge(buildMeasurementConversionMap(from: massUnitBaseFactors), uniquingKeysWith: { _, new in new })
     conversionMap.merge(buildMeasurementConversionMap(from: areaUnitBaseFactors), uniquingKeysWith: { _, new in new })
     return conversionMap
   }
@@ -121,42 +75,18 @@ public enum AssetUnitType: String, Codable, CaseIterable, Identifiable, Hashable
     return measurementConversionMap[source]?[target]
   }
 
-  /// Common real-estate area units by ISO 3166 alpha-2 code.
-  public static func commonRealEstateAreaUnits(alpha2Code: String) -> [AssetUnitType] {
-    let normalizedAlpha2Code = alpha2Code
+  public static func isCustomIdentifier(_ identifier: String) -> Bool {
+    let normalizedIdentifier = identifier
       .trimmingCharacters(in: .whitespacesAndNewlines)
-      .uppercased()
+      .lowercased()
 
-    if normalizedAlpha2Code == HongKong.alpha2Code
-      || normalizedAlpha2Code == Singapore.alpha2Code
-      || normalizedAlpha2Code == UnitedArabEmirates.alpha2Code
-    {
-      return [.sqFoot, .sqMeter]
-    }
+    return normalizedIdentifier.hasPrefix(customIdentifierPrefix)
+      && normalizedIdentifier.count > customIdentifierPrefix.count
+  }
 
-    if normalizedAlpha2Code == Japan.alpha2Code
-      || normalizedAlpha2Code == Taiwan.alpha2Code
-    {
-      return [.ping, .sqMeter]
-    }
-
-    if normalizedAlpha2Code == Canada.alpha2Code {
-      return [.sqFoot, .sqMeter, .acre]
-    }
-
-    if normalizedAlpha2Code == Australia.alpha2Code {
-      return [.sqMeter, .hectare, .acre]
-    }
-
-    if normalizedAlpha2Code == UnitedKingdom.alpha2Code {
-      return [.sqFoot, .sqMeter, .acre, .hectare]
-    }
-
-    if normalizedAlpha2Code == UnitedStates.alpha2Code {
-      return [.sqFoot, .acre]
-    }
-
-    return [.sqMeter]
+  public static func customIdentifier(named name: String) -> String {
+    let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    return customIdentifierPrefix + trimmedName
   }
 
   /// Generates dense conversion factors for units sharing the same base dimension.

@@ -5,6 +5,8 @@ public enum AssetValidationError: Error {
     case invalidQuantityScale
     case invalidValuationTimestamp
     case missingValuationTimestampForMarketAsset
+    case invalidUnitType(String)
+    case incompatibleUnitType(assetType: String, unitType: String)
 }
 
 public extension Asset {
@@ -24,5 +26,34 @@ public extension Asset {
         if let assetType = AssetType(rawValue: type), assetType.requiresValuationTimestamp, valuationAtUnixMs == nil {
             throw AssetValidationError.missingValuationTimestampForMarketAsset
         }
+
+        let resolvedUnitTypeID = normalizedUnitTypeID
+        guard !resolvedUnitTypeID.isEmpty else {
+            return
+        }
+
+        if let unitTypeDefinition = AssetUnitType(id: resolvedUnitTypeID) {
+            if let assetTypeDefinition, !assetTypeDefinition.supports(unitType: unitTypeDefinition) {
+                throw AssetValidationError.incompatibleUnitType(
+                    assetType: assetTypeDefinition.id,
+                    unitType: resolvedUnitTypeID
+                )
+            }
+
+            return
+        }
+
+        if AssetUnitType.isCustomIdentifier(resolvedUnitTypeID) {
+            if let assetTypeDefinition, !assetTypeDefinition.supportsCustomUnitType {
+                throw AssetValidationError.incompatibleUnitType(
+                    assetType: assetTypeDefinition.id,
+                    unitType: resolvedUnitTypeID
+                )
+            }
+
+            return
+        }
+
+        throw AssetValidationError.invalidUnitType(resolvedUnitTypeID)
     }
 }

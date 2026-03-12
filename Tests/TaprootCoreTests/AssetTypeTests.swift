@@ -35,6 +35,48 @@ final class AssetTypeTests: XCTestCase {
         XCTAssertEqual(AssetType.other.displayGroup, .other)
     }
 
+    func testAssetTypeDefaultUnitTypesAreStable() {
+        XCTAssertEqual(AssetType.cash.defaultUnitType, .unit)
+        XCTAssertEqual(AssetType.bankAccount.defaultUnitType, .unit)
+        XCTAssertEqual(AssetType.securities.defaultUnitType, .share)
+        XCTAssertEqual(AssetType.crypto.defaultUnitType, .unit)
+        XCTAssertEqual(AssetType.realEstate.defaultUnitType, .sqMeter)
+        XCTAssertEqual(AssetType.commodities.defaultUnitType, .gram)
+        XCTAssertEqual(AssetType.collectibles.defaultUnitType, .unit)
+        XCTAssertEqual(AssetType.other.defaultUnitType, .other)
+    }
+
+    func testAssetTypeSupportedUnitTypesAreStable() {
+        XCTAssertEqual(AssetType.cash.supportedUnitTypes, Set([.unit]))
+        XCTAssertEqual(AssetType.bankAccount.supportedUnitTypes, Set([.unit]))
+        XCTAssertEqual(AssetType.securities.supportedUnitTypes, Set([.share, .percent, .unit]))
+        XCTAssertEqual(AssetType.crypto.supportedUnitTypes, Set([.unit]))
+        XCTAssertEqual(AssetType.realEstate.supportedUnitTypes, Set([.unit, .percent, .ping, .sqFoot, .sqMeter, .acre, .hectare]))
+        XCTAssertEqual(AssetType.commodities.supportedUnitTypes, Set([.unit, .gram]))
+        XCTAssertEqual(AssetType.collectibles.supportedUnitTypes, Set([.unit]))
+        XCTAssertEqual(AssetType.other.supportedUnitTypes, Set(AssetUnitType.allCases))
+    }
+
+    func testAssetTypeCustomUnitSupportIsIntentional() {
+        XCTAssertFalse(AssetType.cash.supportsCustomUnitType)
+        XCTAssertFalse(AssetType.bankAccount.supportsCustomUnitType)
+        XCTAssertFalse(AssetType.securities.supportsCustomUnitType)
+        XCTAssertFalse(AssetType.crypto.supportsCustomUnitType)
+        XCTAssertTrue(AssetType.realEstate.supportsCustomUnitType)
+        XCTAssertTrue(AssetType.commodities.supportsCustomUnitType)
+        XCTAssertTrue(AssetType.collectibles.supportsCustomUnitType)
+        XCTAssertTrue(AssetType.other.supportsCustomUnitType)
+    }
+
+    func testAssetTypeSupportsUnitTypeUsesCompatibilityRules() {
+        XCTAssertTrue(AssetType.securities.supports(unitType: .share))
+        XCTAssertTrue(AssetType.securities.supports(unitType: .percent))
+        XCTAssertFalse(AssetType.securities.supports(unitType: .gram))
+        XCTAssertTrue(AssetType.realEstate.supports(unitType: .acre))
+        XCTAssertFalse(AssetType.realEstate.supports(unitType: .gram))
+        XCTAssertTrue(AssetType.other.supports(unitType: .gram))
+    }
+
     func testAssetTypeDisplayGroupUsesCaseNameAsID() {
         XCTAssertEqual(AssetTypeDisplayGroup.liquid.id, "liquid")
         XCTAssertEqual(AssetTypeDisplayGroup.market.id, "market")
