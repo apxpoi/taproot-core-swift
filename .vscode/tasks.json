@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "swift: Build Debug taproot-core-cli",
+      "type": "shell",
+      "command": "swift",
+      "args": [
+        "build",
+        "--product",
+        "taproot-core-cli"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "swift: Build Release taproot-core-cli",
+      "type": "shell",
+      "command": "swift",
+      "args": [
+        "build",
+        "--configuration",
+        "release",
+        "--product",
+        "taproot-core-cli"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "swift: Run taproot-core-cli",
+      "type": "shell",
+      "command": "swift",
+      "args": [
+        "run",
+        "taproot-core-cli"
+      ],
+      "dependsOn": "swift: Build Debug taproot-core-cli",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
+}

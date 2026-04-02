@@ -1,0 +1,33 @@
+{
+  "originHash" : "c150dc3deb36d9d21eea3693fb36c8374489b17d8716635b8e059fc2195fd7a1",
+  "pins" : [
+    {
+      "identity" : "iso3166-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/giant-stone/iso3166-swift",
+      "state" : {
+        "revision" : "2e621a621d13a6b46ec2b01c8473bd5c2ddeaa62",
+        "version" : "2026.3.1"
+      }
+    },
+    {
+      "identity" : "swift-asn1",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-asn1.git",
+      "state" : {
+        "revision" : "810496cf121e525d660cd0ea89a758740476b85f",
+        "version" : "1.5.1"
+      }
+    },
+    {
+      "identity" : "swift-crypto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-crypto.git",
+      "state" : {
+        "revision" : "95ba0316a9b733e92bb6b071255ff46263bbe7dc",
+        "version" : "3.15.1"
+      }
+    }
+  ],
+  "version" : 3
+}

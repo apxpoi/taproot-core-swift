@@ -1,12 +1,17 @@
 {
   "swiftformat.enable": true,
   "swiftformat.path": [
-    "/opt/homebrew/bin/swiftformat"
+    // "C:\\bin\\swiftformat.exe",
+    // "/opt/homebrew/bin/swiftformat"
   ],
   "cSpell.words": [
     "Ciphertext",
+    "etfs",
+    "fputs",
     "HMAC",
     "PBKDF",
-    "PBKDF2"
+    "PBKDF2",
+    "Stablecoins",
+    "uniquing"
   ]
 }

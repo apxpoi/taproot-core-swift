@@ -1,0 +1,113 @@
+name: Build CLI Artifacts (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      artifact-retention-days:
+        description: "Artifact retention in days."
+        required: false
+        default: 14
+        type: number
+
+permissions:
+  contents: read
+
+jobs:
+  build-cli-binaries:
+    name: Build Static CLI Binary (${{ matrix.os }}, Swift 6.2)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Up Swift 6.2
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.2"
+
+      - name: Swift Version
+        run: swift --version
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            .swiftpm
+          key: ${{ runner.os }}-${{ runner.arch }}-swift-6.2-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-swift-6.2-
+
+      - name: Resolve Dependencies
+        run: swift package resolve
+
+      - name: Build taproot-core-swift (Release, Static Swift Stdlib)
+        run: swift build -c release --product taproot-core-swift --static-swift-stdlib
+
+      - name: Package CLI Artifact (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BIN_PATH="$(swift build -c release --show-bin-path)"
+          BIN_NAME="taproot-core-swift"
+          SRC_BIN="${BIN_PATH}/${BIN_NAME}"
+
+          if [[ ! -f "${SRC_BIN}" ]]; then
+            echo "Binary not found: ${SRC_BIN}"
+            exit 1
+          fi
+
+          ARCH="$(echo "${RUNNER_ARCH}" | tr '[:upper:]' '[:lower:]')"
+          DIST_DIR="dist/taproot-core-swift-macos-${ARCH}"
+          mkdir -p "${DIST_DIR}"
+
+          cp "${SRC_BIN}" "${DIST_DIR}/${BIN_NAME}"
+          chmod +x "${DIST_DIR}/${BIN_NAME}"
+          shasum -a 256 "${DIST_DIR}/${BIN_NAME}" > "${DIST_DIR}/SHA256SUMS"
+
+          tar -czf "${DIST_DIR}.tar.gz" -C "${DIST_DIR}" "${BIN_NAME}" "SHA256SUMS"
+
+      - name: Package CLI Artifact (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $binPath = (swift build -c release --show-bin-path).Trim()
+          $binaryName = "taproot-core-swift.exe"
+          $sourceBinary = Join-Path $binPath $binaryName
+
+          if (-not (Test-Path $sourceBinary)) {
+            throw "Binary not found: $sourceBinary"
+          }
+
+          $arch = $env:RUNNER_ARCH.ToLower()
+          $distDir = Join-Path $pwd "dist/taproot-core-swift-windows-$arch"
+          New-Item -ItemType Directory -Path $distDir -Force | Out-Null
+
+          $distBinary = Join-Path $distDir $binaryName
+          Copy-Item -Path $sourceBinary -Destination $distBinary -Force
+
+          $hash = (Get-FileHash -Path $distBinary -Algorithm SHA256).Hash.ToLower()
+          Set-Content -Path (Join-Path $distDir "SHA256SUMS.txt") -Value "$hash  $binaryName" -NoNewline
+
+          Compress-Archive -Path (Join-Path $distDir "*") -DestinationPath "$distDir.zip" -Force
+
+      - name: Upload CLI Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: taproot-core-swift-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/**/SHA256SUMS*
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact-retention-days }}
